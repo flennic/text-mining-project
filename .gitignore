@@ -1,3 +1,6 @@
 .DS_Store
+.idea
+.idea/
+*.pickle
 src/data
 src/data/

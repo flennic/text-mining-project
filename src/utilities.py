@@ -43,20 +43,21 @@ def create_data_sets(settings):
             logger.info("Done loading data from cache.")
             return zip(*data_sets)
 
-    fractions = np.array([0.4, 0.3, 0.2, 0.1])
+    fractions = np.array([0.5, 0.3, 0.2])
 
     data = pd.read_csv(settings["orig_output_path"])
+    data["category"] = data["category"] - 1
     data = data.sample(frac=1, random_state=settings["seed"]).reset_index(drop=True)
 
-    train, val, test, stest = np.array_split(data, (fractions[:-1].cumsum() * len(data)).astype(int))
+    train, val, test = np.array_split(data, (fractions[:-1].cumsum() * len(data)).astype(int))
 
     if settings["use_cache"]:
         logger.info("Creating cache...")
         with open(pickle_path, "wb") as pickled:
-            pickle.dump(zip(train, val, test, stest), pickled)
+            pickle.dump(zip(train, val, test), pickled)
 
     logger.info("Done splitting data.")
 
-    return train, val, test, stest
+    return train, val, test
 
 

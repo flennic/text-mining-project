@@ -83,7 +83,7 @@ preprocessing.concatenate_data(settings)
 preprocessing.create_data_sets(settings)
 
 # Create embedded data sets
-preprocessing.create_word2vec_embeddings(settings)
+#preprocessing.create_word2vec_embeddings(settings)
 
 
 #processor = DataProcessor()

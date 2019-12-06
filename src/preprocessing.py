@@ -51,7 +51,7 @@ def create_data_sets(settings):
         logger.info("Data sets already created.")
         return
 
-    fractions = np.array([0.5, 0.3, 0.2])
+    fractions = np.array([0.85, 0.1, 0.05])
 
     data = pd.read_csv(settings["orig_output_path"])
     data.rename(columns={"category": "label"}, inplace=True)

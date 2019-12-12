@@ -1,0 +1,41 @@
+{
+    "orig_train_path": "data/original/train.csv",
+    "orig_test_path": "data/original/test.csv",
+    "processed_data_folder": "data/processed/",
+    "cached_model_path": "checkpoints/2019-12-12_22-9_LstmWord2VecModelInteractor.pth",
+
+    "word2vec_path": "data/embeddings/GoogleNews-vectors-negative300.bin",
+    "splits": [0.85, 0.1, 0.05],
+    "padding": 200,
+    "embeddings": 1000000,
+    "categories": 5,
+    "run_model": "lstm_w2v",
+    "load_cached_model": true,
+
+    "models": {
+        "ffn_w2v": {
+            "data_loader_workers": 4,
+            "batch_size": 8192,
+            "learning_rate": 0.05,
+            "epochs": 1,
+            "embedding_size": 300,
+            "dropout": 0.25,
+            "hidden": 256
+        },
+        "lstm_w2v": {
+            "data_loader_workers": 4,
+            "batch_size": 1024,
+            "learning_rate": 0.05,
+            "epochs": 1,
+            "embedding_size": 300,
+            "dropout": 0.25,
+            "lstm_layers": 2,
+            "lstm_hidden": 128,
+            "lstm_dropout": 0.25,
+            "gradient_clip": 5
+        }
+    },
+
+    "seed": 42,
+    "cache": true
+}

@@ -1,109 +1,189 @@
 import pandas as pd
 import logging
-from os import path, remove
+import os
 import numpy as np
-import spacy
-import pickle
-import gc
-from gensim.models import KeyedVectors
+from transformers import BertTokenizer
+import multiprocessing as mp
+import gensim
 
 logger = logging.getLogger(__name__)
 
+__tokenizer = None
+__embedder = None
+__pad_token = None
+__unk_token = None
+__padding = None
 
-def concatenate_data(settings):
-    logger.info("Starting to process original data.")
 
-    if path.exists(settings["orig_output_path"]):
-        if settings["use_cache"]:
-            logger.info("The original data is already concatenated.")
-            return
-        else:
-            remove(settings["orig_output_path"])
+# noinspection PyProtectedMember
+# noinspection PyTypeChecker,DuplicatedCode,PyUnboundLocalVariable
+def preprocess_w2v(settings):
 
-    logger.info("Concatenating data...")
+    logger.info("Starting to process data for Word2Vec.")
+
+    l_indicator = "w2v"
+    l_embedding = settings["embeddings"]
+    l_padding = settings["padding"]
+    file_suffix = "i-{}_e-{}_p-{}".format(l_indicator, l_embedding, l_padding)
+
+    prep_train_path = "{}train_{}_s{}.csv".format(settings["processed_data_folder"],
+                                                  file_suffix, str(settings["splits"][0]))
+    prep_val_path = "{}val_{}_s{}.csv".format(settings["processed_data_folder"],
+                                              file_suffix, str(settings["splits"][1]))
+    prep_test_path = "{}test_{}_s{}.csv".format(settings["processed_data_folder"],
+                                                file_suffix, str(settings["splits"][2]))
+
+    if (settings["cache"]
+            and os.path.exists(prep_train_path)
+            and os.path.exists(prep_val_path)
+            and os.path.exists(prep_test_path)):
+
+        logger.info("Word2Vec data already preprocessed. Doing nothing.")
+
+        return {
+            "processed_train_file": prep_train_path,
+            "processed_val_file": prep_val_path,
+            "processed_test_file": prep_test_path,
+        }
+
+    logger.info("Reading original data to memory and concatenating them.")
 
     train = pd.read_csv(settings["orig_train_path"], header=None)
     test = pd.read_csv(settings["orig_test_path"], header=None)
-
     data = pd.concat([train, test])
-    data.columns = ["category", "title", "review"]
 
-    data.to_csv(settings["orig_output_path"], index=False)
+    del train, test
 
-    logger.info("Done concatenating data.")
+    logger.info("Adjusting labels, filtering columns, shuffling and splitting data.")
 
-
-def create_data_sets(settings):
-    logger.info("Splitting data and creating creating data sets...")
-    # pickle_path = "create_data_sets.pickle"
-
-    # if settings["use_cache"] and path.exists(pickle_path) and path.isfile(pickle_path):
-    #    logger.info("Loading data from cache...")
-    #    with open(pickle_path, "rb") as pickled:
-    #        data_sets = pickle.load(pickled)
-    #        logger.info("Done loading data from cache.")
-    #        return zip(*data_sets)
-
-    if (settings["use_cache"]
-            and path.exists(settings["train_path"])
-            and path.exists(settings["val_path"])
-            and path.exists(settings["test_path"])):
-        logger.info("Data sets already created.")
-        return
-
-    fractions = np.array([0.85, 0.1, 0.05])
-
-    data = pd.read_csv(settings["orig_output_path"])
-    data.rename(columns={"category": "label"}, inplace=True)
+    data.columns = ["label", "title", "review"]
+    data.drop(columns=['title'], inplace=True)
     data["label"] = data["label"] - 1
-    data.drop("title", axis=1, inplace=True)
-    # BERT needs this. Be nice to BERT!
-    data.insert(loc=1, column='alpha', value="a")
-
     data = data.sample(frac=1, random_state=settings["seed"]).reset_index(drop=True)
+    train, val, test = np.array_split(data, (np.array(settings["splits"])[:-1].cumsum() * len(data)).astype(int))
 
-    train, val, test = np.array_split(data, (fractions[:-1].cumsum() * len(data)).astype(int))
+    del data
 
-    train.to_csv(settings["train_path"], index=True, index_label="id", header=True)
-    val.to_csv(settings["val_path"], index=True, index_label="id", header=True)
-    test.to_csv(settings["test_path"], index=True, index_label="id", header=True)
+    train = train.values.tolist()
+    val = val.values.tolist()
+    test = test.values.tolist()
 
-    # if settings["use_cache"]:
-    #    logger.info("Creating cache...")
-    #    with open(pickle_path, "wb") as pickled:
-    #        pickle.dump(zip(train, val, test), pickled)
+    logger.info("Loading tokenizer and word embeddings.")
 
-    logger.info("Done splitting data.")
+    # These must be global, so that they can be pickled for multiprocessing!
 
-    return
+    global __padding
+    __padding = settings["padding"]
+
+    global __tokenizer
+    __tokenizer = get_tokenizer()
+
+    global __embedder
+    __embedder = get_embedder(settings, __tokenizer._unk_token, __tokenizer._pad_token)
+
+    global __pad_token, __unk_token
+    __pad_token = __tokenizer._pad_token
+    __unk_token = __tokenizer._unk_token
+
+    cores = max(1, round(mp.cpu_count() / 2))
+
+    logger.info("Using {} cores for pre-processing.".format(cores))
+
+    # Some repetitive code, but as it breaks easily, this will stay separated. Also the amount of sets will always
+    # stay the same
+
+    logger.info("Starting pre-processing for TEST. Might take a while...")
+
+    # Parallelising, will work as long as the processing is not too fast and fills the memory :o
+    pool = mp.Pool(cores)
+    processed_test = pool.imap(__preprocess, test)
+
+    with open(prep_test_path, "w") as out_file:
+        for X, Y in processed_test:
+            stringified = [str(entry) for entry in [Y] + X]
+            out_file.write(",".join(stringified) + "\n")
+
+    pool.close()
+    pool.join()
+
+    del test, processed_test
+
+    logger.info("Starting pre-processing for VAL. Might take a while...")
+
+    # Parallelising, will work as long as the processing is not too fast and fills the memory :o
+    pool = mp.Pool(cores)
+    processed_val = pool.imap(__preprocess, val)
+
+    with open(prep_val_path, "w") as out_file:
+        for X, Y in processed_val:
+            stringified = [str(entry) for entry in [Y] + X]
+            out_file.write(",".join(stringified) + "\n")
+
+    pool.close()
+    pool.join()
+
+    del val, processed_val
+
+    logger.info("Starting pre-processing for TRAIN. Might take a while...")
+
+    # Parallelising, will work as long as the processing is not too fast and fills the memory :o
+    pool = mp.Pool(cores)
+    processed_train = pool.imap(__preprocess, train)
+
+    with open(prep_train_path, "w") as out_file:
+        for X, Y in processed_train:
+            stringified = [str(entry) for entry in [Y] + X]
+            out_file.write(",".join(stringified) + "\n")
+
+    pool.close()
+    pool.join()
+
+    del train, processed_train, pool
+
+    # or return and reuse
+    del __embedder, __tokenizer, __pad_token, __unk_token, __padding
+
+    logger.info("Pre-processing completed.")
+
+    return {
+        "embedded_vectors": __embedder.vectors,
+        "processed_train_file": prep_train_path,
+        "processed_val_file": prep_val_path,
+        "processed_test_file": prep_test_path,
+    }
 
 
-def create_word2vec_embeddings(settings):
-    # Tokenizer
-    nlp = spacy.load("en_core_web_sm")
-    # Vectorizer
-    model = KeyedVectors.load_word2vec_format('data/embeddings/GoogleNews-vectors-negative300.bin', binary=True)
-    vector_size = model['hello'].shape[0]
+# noinspection PyTypeChecker
+def get_embedder(settings, unk_token, pad_token):
 
-    data_set_paths = (settings["train_path"], settings["val_path"], settings["test_path"])
+    embedder = gensim.models.KeyedVectors.load_word2vec_format(
+        settings["word2vec_path"], limit=settings["embeddings"], binary=True)
+    embedder.add(unk_token, np.mean(embedder.vectors, axis=0), replace=False)
+    embedder.add(pad_token, np.zeros(300), replace=False)
 
-    for data_set_path in data_set_paths:
-        data = pd.read_csv(data_set_path)
+    return embedder
 
-        vectorized_data = []
 
-        # id, label, alpha, review
-        for index, row in data.iterrows():
-            # lemmatized_review = [word.lemma_ for word in nlp(row["review"])]
-            # lemmatized_review = [token.lemma_ for token in nlp(row["review"])
-            #                     if not token.is_stop and str.isalpha(token.lemma_) and len(token.lemma_) > 2]
-            vectorized_review = tuple(model[token.lemma_] if token.lemma_ != "-PRON-" else token.text.lower()
-                                      for token in nlp(row["review"])
-                                      if token.lemma_ in model.vocab)
-            vectorized_data.append((row["id"], row["label"], row["alpha"]) + vectorized_review)
+def get_tokenizer():
+    return BertTokenizer.from_pretrained('bert-base-uncased')
 
-        column_names = ['id', 'label', 'alpha'] + [str(x) for x in range(vector_size + 1)]
-        df = pd.DataFrame(vectorized_data, columns=column_names)
-        pickle.dump(df, data_set_path + ".vectorized..pickle")
-        del df
-        gc.collect()
+
+def __preprocess(row):
+
+    # row = [label, review]
+
+    # Tokenize
+    sentence = __tokenizer.tokenize(row[1][:__padding])
+
+    # Pad
+    # noinspection PyTypeChecker
+    sentence = sentence + [__pad_token] * (__padding - len(sentence))
+
+    # Unknown words
+    filled_sentence = [word if __embedder.vocab.get(word) is not None else __unk_token for word in sentence]
+
+    # To indices
+    sentence_as_int = [__embedder.vocab.get(word).index for word in filled_sentence]
+
+    # X, Y
+    return sentence_as_int, row[0]

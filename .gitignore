@@ -6,3 +6,5 @@ __pycache__
 *.pickle
 src/data
 src/data/
+src/checkpoints
+src/checkpoints/

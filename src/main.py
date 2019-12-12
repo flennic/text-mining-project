@@ -9,41 +9,48 @@ import numpy as np
 from transformers.data.processors.utils import DataProcessor
 
 # Default settings. Will be overwritten by parameters set in the configuration file.
+from interactors.FfnWord2VecModelInteractor import FfnWord2VecModelInteractor
+from interactors.LstmWord2VecModelInteractor import LstmWord2VecModelInteractor
+
 settings = {
     # Data Processing
-    #"orig_train_path": u"data/processed/train.csv",
-    #"orig_test_path": u"data/processed/test.csv",
-    #"orig_output_path": u"data/processed/data.csv",
-    "train_path": u"data/processed/train.csv",
-    "val_path": u"data/processed/val.csv",
-    "test_path": u"data/processed/test.csv",
-    "word2vec_path" u"'data/embeddings/GoogleNews-vectors-negative300.bin'"
+    # Paths
+    "orig_train_path": "data/original/train.csv",
+    "orig_test_path": "data/original/test.csv",
+    "processed_data_folder": "data/processed/",
+    "cached_model_path": "checkpoints/2019-12-12_22-9_LstmWord2VecModelInteractor.pth",
+
+    # Settings
+    "word2vec_path": "data/embeddings/GoogleNews-vectors-negative300.bin",
+    "splits": [0.85, 0.1, 0.05],
+    "padding": 200,
+    "embeddings": 1_000_000,
+    "categories": 5,
+    "run_model": "lstm_w2v",
+    "load_cached_model": True,
 
     # Models
     "models": {
-        #"bert": {
-        #    "vocab_size_or_config_json_file": 30522,
-        #    "hidden_size": 768,
-        #    "num_hidden_layers": 12,
-        #    "num_attention_heads": 12,
-        #    "intermediate_size": 3072,
-        #    "hidden_act": "gelu",
-        #    "hidden_dropout_prob": 0.1,
-        #    "attention_probs_dropout_prob": 0.1,
-        #    "max_position_embeddings": 512,
-        #    "type_vocab_size": 2,
-        #    "initializer_range": 0.02,
-        #    "layer_norm_eps": 1e-12
-        #},
-        "bert": {
-            "model": "bert-base-cased",
-            "task_name": "task_name",
-            "cache_dir": "cache/",
-            "sequence_length": 128,
-            "train_batch_size": 32,
-            "eval_batch_size:": 64,
-            "learning_rate": 2e-5,
-            "epochs": 2,
+        "ffn_w2v": {
+            "data_loader_workers": 4,
+            "batch_size": 8192,
+            "learning_rate": 0.05,
+            "epochs": 1,
+            "embedding_size": 300,  # Fixed for Word2Vec, so do not change
+            "dropout": 0.25,
+            "hidden": 256
+        },
+        "lstm_w2v": {
+            "data_loader_workers": 4,
+            "batch_size": 1024,
+            "learning_rate": 0.05,
+            "epochs": 1,
+            "embedding_size": 300,  # Fixed for Word2Vec, so do not change
+            "dropout": 0.25,
+            "lstm_layers": 2,
+            "lstm_hidden": 128,
+            "lstm_dropout": 0.25,
+            "gradient_clip": 5
         }
     },
 
@@ -53,7 +60,7 @@ settings = {
     # Miscellaneous
     "seed": 42,
     "log_level": logging.INFO,
-    "use_cache": True
+    "cache": True
 }
 
 # Defining Logging
@@ -64,7 +71,7 @@ logger = logging.getLogger(__name__)
 np.random.seed(settings["seed"])
 
 # Collecting settings
-logger.info("Reading settings and updating with default values...")
+logger.info("Reading settings and updating with default values.")
 
 try:
     with open('settings.json') as settings_file:
@@ -79,21 +86,32 @@ except FileNotFoundError:
 
 # Pre processing
 # Prepare the original data, as it is divided in train and test
-preprocessing.concatenate_data(settings)
-preprocessing.create_data_sets(settings)
 
-# Create embedded data sets
-#preprocessing.create_word2vec_embeddings(settings)
-
-
-#processor = DataProcessor()
-#train_examples = processor.get_train_examples(DATA_DIR)
-#train_examples_len = len(train_examples)
+pre_process_info = preprocessing.preprocess_w2v(settings)
 
 # Modelling
+if settings["run_model"] == "ffn_w2v":
+    if settings["load_cached_model"]:
+        model = FfnWord2VecModelInteractor.load(settings["cached_model_path"])
+    else:
+        model = FfnWord2VecModelInteractor(settings, pre_process_info)
+elif settings["run_model"] == "lstm_w2v":
+    if settings["load_cached_model"]:
+        model = LstmWord2VecModelInteractor.load(settings["cached_model_path"])
+    else:
+        model = LstmWord2VecModelInteractor(settings, pre_process_info)
+else:
+    message = "Model {} is not supported.".format(settings["model_to_use"])
+    logger.critical(message)
+    raise ValueError(message)
 
 # Training
+model._settings["models"]["lstm_w2v"]["epochs"] = 2
+model.train()
 
-# Validating
+# Saving
+#model.save()
+
+# Testing
 
 

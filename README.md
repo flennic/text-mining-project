@@ -33,7 +33,7 @@ For the following I suggest setting up a new anaconda environment. You will need
 
 ## Disclaimer
 
-Please be aware that this is just a small project aimed at two weeks of full time work, so the code might be edgy on some parts. Nor is this intended to be used in a productive environment in any sense.
+Please be aware that this is just a small project aimed at two weeks of full time work, so the code might be edgy in some parts. Nor is this intended to be used in a productive environment in any sense.
 
 ## `config.json`
 

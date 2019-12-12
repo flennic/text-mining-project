@@ -14,27 +14,27 @@ First clone the repository locally:
 
 Next you need the data set itself as well as the word embeddings.
 The dataset [Amazon Reviews for Sentiment Analysis](https://www.kaggle.com/bittlingmayer/amazonreviews) can be found on Kaggle.
-The data is expection to be in a folder `data/original/` but you can change the path in the `settings.json` if desired.
+The data is expected to be in a folder `data/original/` but you can change the path in the `settings.json` if desired.
 You will also need the Word2Vec embeddings, which can be found e.g. [here](https://github.com/mmihaltz/word2vec-GoogleNews-vectors). The embeddings are expected to be in `data/original/`. Again check the `settings.json` file.
 
-For starting and training a model, you call `main.py`. The default settings fault in there will be overwritten by your settings file. If you don't specifcy an entry, the default from `main.py` is taken.
+For starting and training a model, you call `main.py`. The default settings fault in there will be overwritten by your settings file. If you don't specify an entry, the default from `main.py` is taken.
 
 You will find an example `config.json` further down this readme.
 
 ## Requirements
 
-I strongly suggest having at least 20GB of free disk space, 16GB am memory and a dedicated graphics cards, otherweise you won't have fun running this project. The default settings assume above mentioned requirements and 8GB of VRAM, if you have less, feel free to reduce thge batch sizes. Be aware that training times might drastically increase.
+I strongly suggest having at least 20GB of free disk space, 16GB am memory and a dedicated graphics cards, otherwise you won't have fun running this project. The default settings assume above mentioned requirements and 8GB of VRAM, if you have less, feel free to reduce thge batch sizes. Be aware that training times might drastically increase.
 
 The preprocessing will take some time, so be patient. Leave the `cache` parameter set to true, so that you only have to do it once.
 
-For the following I suggest setting up a new anacoda environment. You will need the following libraries:
-- PyTorch 1.3.1 (probably also works with others, but you're probably best of with this one for this project).
+For the following I suggest setting up a new anaconda environment. You will need the following libraries:
+- PyTorch 1.3.1 (probably also works with others, but you're probably best with this one for this project).
 - The [transformers](https://github.com/huggingface/transformers) library from huggingface.
-- [gensim](https://radimrehurek.com/gensim/) is used for managing Word2Vec embeddings. This is jsut for my personal convience.
+- [gensim](https://radimrehurek.com/gensim/) is used for managing Word2Vec embeddings. This is just for my personal convenience.
 
 ## Disclaimer
 
-Please be aware that this is just a small project aimed at two works of full time work, so the code might be edgy on some parts. Nor is this intented to be used in a productive environment in any sense.
+Please be aware that this is just a small project aimed at two works of full time work, so the code might be edgy on some parts. Nor is this intended to be used in a productive environment in any sense.
 
 ## `config.json`
 
@@ -86,5 +86,5 @@ Please be aware that this is just a small project aimed at two works of full tim
 ## License information
 
 See the attached license file for further notice.
-**I hereby explicitly prohibit to use of any parts of repository in the vicinity of the course, tldr: don't copy my project!**
+**I hereby explicitly prohibit using of any parts of repository in the vicinity of the course, tldr: don't copy my project!**
 

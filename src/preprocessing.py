@@ -18,7 +18,13 @@ __padding = None
 # noinspection PyProtectedMember
 # noinspection PyTypeChecker,DuplicatedCode,PyUnboundLocalVariable
 def preprocess_w2v(settings):
-
+    """
+    Pre-processes the original files to indices that can directly be fed to the network. Performs concatenating,
+    column-reduction, shuffling, tokenization, padding and vectorization.
+    @param settings: A dictionary containing the required keys.
+    @return: Returns a dictionary containing the paths of the created files and the loaded word embeddings so that they
+            can be used in further processing steps if needed.
+    """
     logger.info("Starting to process data for Word2Vec.")
 
     l_indicator = "w2v"
@@ -155,7 +161,14 @@ def preprocess_w2v(settings):
 
 # noinspection PyTypeChecker
 def get_embedder(settings, unk_token, pad_token):
-
+    """
+    Creates the word2vec embeddings provided by gensim. Add tokens for padding and unknown. Padding vectors are all 0
+    while unknown are the mean of all known vectors.
+    @param settings: Dictionary containing the required keys.
+    @param unk_token: The token to use for unknown word (string).
+    @param pad_token: The token to use for padding (string).
+    @return: Returns the embedding model from gensim.
+    """
     embedder = gensim.models.KeyedVectors.load_word2vec_format(
         settings["word2vec_path"], limit=settings["embeddings"], binary=True)
     embedder.add(unk_token, np.mean(embedder.vectors, axis=0), replace=False)
@@ -165,11 +178,19 @@ def get_embedder(settings, unk_token, pad_token):
 
 
 def get_tokenizer():
+    """
+    Loads the pre-trained tokenizer 'bert-base-uncased' from the transformers library.
+    @return: Returns the tokenizer provided by the transformers library.
+    """
     return BertTokenizer.from_pretrained('bert-base-uncased')
 
 
 def __preprocess(row):
-
+    """
+    Pre-processes a row by first tokenizing it, then padding it and finding unknown words. Last indices are obtained.
+    @param row: A string of text.
+    @return: Returns the indexed sentence and the label.
+    """
     # row = [label, review]
 
     # Tokenize

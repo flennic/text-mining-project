@@ -14,7 +14,19 @@ logger = logging.getLogger(__name__)
 
 # noinspection PyTypeChecker,PyProtectedMember,PyArgumentList,DuplicatedCode
 class FfnWord2VecModelInteractor:
+    """Model interactor for storing and managing the PyTorch model. This one implements a simple feed-forward
+    network using word embeddings from Word2Vec for text classification."""
+
     def __init__(self, settings, info, load_embeddings=True):
+        """
+        Creates the interactor object and conducts all required steps, so initialization might take a while.
+        @param settings: A dictionary that provides all required keys. See example config file for all option.
+        @param info: A dictionary that contains the paths to the preprocessed files and optionally the embedded
+                        word vectors if already loaded, so that they can be reused.
+        @param load_embeddings: If set to false, word vectors are never loaded. If none are available, the embeddings
+                        layer will be filled with just zeros. Might come in handy when loading a model where the
+                        embeddings are overwritten anyways.
+        """
 
         logger.info("Initializing FnnWord2Vec model interactor.")
 
@@ -87,6 +99,11 @@ class FfnWord2VecModelInteractor:
     # noinspection PyArgumentList
     @staticmethod
     def __batch2tensor__(batch):
+        """
+        Takes a batch ans transforms it in such a way that it can directly be fed to the network.
+        @param batch: List of x and y labels.
+        @return: Two tensors, one for x and one for y.
+        """
         x, y = [None] * len(batch), [None] * len(batch)
         for i, row in enumerate(batch):
             y[i] = row[0]
@@ -95,7 +112,10 @@ class FfnWord2VecModelInteractor:
         return torch.LongTensor(x), torch.LongTensor(y)
 
     def train(self):
-
+        """
+        Trains the model until the number of epochs in settings for the model is reached. Prints metrics while
+        processing. Losses and accuracies are saved within the object.
+        """
         logger.info("Beginning training of model (FNN, Word2Vec).")
 
         self._optimizer = torch.optim.Adam(self._model.parameters(),
@@ -174,7 +194,10 @@ class FfnWord2VecModelInteractor:
         logger.info("Training completed.")
 
     def save(self):
-
+        """
+        Saves to model to the path specified in the settings. Subdirectory is always 'checkpoints'.
+        @return: None.
+        """
         logger.info("Start saving model.")
 
         checkpoint = {"settings": self._settings,
@@ -204,7 +227,12 @@ class FfnWord2VecModelInteractor:
 
     @staticmethod
     def load(filepath):
-
+        """
+        Loads a model. Be aware that the old settings are also reloaded, so you have to manually overwrite settings
+        you want to change after reloading.
+        @param filepath: Path to the saves checkpoint file.
+        @return: Returns a complete model interactor with the model loaded.
+        """
         logger.info("Start loading model.")
 
         checkpoint = torch.load(filepath)

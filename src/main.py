@@ -6,7 +6,6 @@ import logging
 import json
 import numpy as np
 
-from transformers.data.processors.utils import DataProcessor
 
 # Default settings. Will be overwritten by parameters set in the configuration file.
 from interactors.FfnWord2VecModelInteractor import FfnWord2VecModelInteractor
@@ -106,11 +105,10 @@ else:
     raise ValueError(message)
 
 # Training
-model._settings["models"]["lstm_w2v"]["epochs"] = 2
 model.train()
 
 # Saving
-#model.save()
+model.save()
 
 # Testing
 

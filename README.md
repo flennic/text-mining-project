@@ -13,9 +13,8 @@ First clone the repository locally:
 ```git clone https://github.com/flennic/text-mining-project```
 
 Next you need the data set itself as well as the word embeddings.
-The dataset [Amazon Reviews for Sentiment Analysis](https://www.kaggle.com/bittlingmayer/amazonreviews) can be found on Kaggle.
-The data is expected to be in a folder `data/original/` but you can change the path in the `settings.json` if desired.
-You will also need the Word2Vec embeddings, which can be found e.g. [here](https://github.com/mmihaltz/word2vec-GoogleNews-vectors). The embeddings are expected to be in `data/original/`. Again check the `settings.json` file.
+The dataset [Amazon Reviews for Sentiment Analysis](https://www.kaggle.com/bittlingmayer/amazonreviews) can be found on Kaggle. The data is expected to be in a folder `data/original/` but you can change the path in the `settings.json` if desired.
+You will also need the Word2Vec embeddings, which can be found e.g. [here](https://github.com/mmihaltz/word2vec-GoogleNews-vectors). The embeddings are expected to be in `data/original/`. Again check the `settings.json` file. I might supply a small script in the future that automates this process.
 
 For starting and training a model, you call `main.py`. The default settings fault in there will be overwritten by your settings file. If you don't specify an entry, the default from `main.py` is taken.
 

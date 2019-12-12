@@ -1,3 +1,6 @@
+#  Copyright (c) 2019, Maximilian Pfundstein
+#  Please check the attached license file as well as the license notice in the readme.
+
 from json import JSONDecodeError
 
 import torch

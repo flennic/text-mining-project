@@ -29,6 +29,12 @@ The preprocessing will take some time, so be patient. Leave the `cache` paramete
 
 For the following I suggest setting up a new anacoda environment. You will need the following libraries:
 - PyTorch 1.3.1 (probably also works with others, but you're probably best of with this one for this project).
+- The [transformers](https://github.com/huggingface/transformers) library from huggingface.
+- [gensim](https://radimrehurek.com/gensim/) is used for managing Word2Vec embeddings. This is jsut for my personal convience.
+
+## Disclaimer
+
+Please be aware that this is just a small project aimed at two works of full time work, so the code might be edgy on some parts. Nor is this intented to be used in a productive environment in any sense.
 
 ## `config.json`
 
@@ -76,7 +82,6 @@ For the following I suggest setting up a new anacoda environment. You will need 
     "cache": true
 }
 ```
-
 
 ## License information
 

@@ -85,5 +85,6 @@ Please be aware that this is just a small project aimed at two works of full tim
 ## License information
 
 See the attached license file for further notice.
-**I hereby explicitly prohibit using of any parts of repository in the vicinity of the course, tldr: don't copy my project!**
+
+**I hereby explicitly prohibit using any the parts of this repository with respect to the course, tldr: don't copy my project!**
 

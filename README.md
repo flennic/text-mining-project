@@ -16,7 +16,7 @@ Next you need the data set itself as well as the word embeddings.
 The dataset [Amazon Reviews for Sentiment Analysis](https://drive.google.com/open?id=0Bz8a_Dbh9QhbZVhsUnRWRDhETzA) can be found on Google Drive and is originally provided by Xiang Zhang. The data is expected to be in a folder `data/original/` but you can change the path in the `settings.json` if desired.
 You will also need the Word2Vec embeddings, which can be found e.g. [here](https://github.com/mmihaltz/word2vec-GoogleNews-vectors). The embeddings are expected to be in `data/original/`, which can also be changed in the `settings.json` file.
 
-If you want your sweet automation, just do `chmod +x fetch-data.sh` and then `./fetch-data.sh` and the script will download the data for you. Be aware that the script does not have any error handling, so use it with caution.
+If you want your sweet automation, just do `chmod +x fetch-data.sh` and then `./fetch-data.sh` and the script will download the data for you. Be aware that the script does not have any error handling, so use it with caution. It also assumes default paths.
 
 For starting and training a model, you call `main.py`. The default settings fault in `main.py` will be overwritten by your settings file. If you don't specify an entry, the default from `main.py` is taken automatically.
 

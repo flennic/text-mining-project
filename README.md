@@ -33,11 +33,11 @@ You should install CUDA for make the GPU work [CUDA](https://developer.nvidia.co
 For the following I suggest setting up a new anaconda environment. You will need the following libraries:
 
 - PyTorch 1.3.1 (probably also works with others, but you're probably best with this one for this project).
-        - `conda install -c pytorch pytorch`
+    - `conda install -c pytorch pytorch`
 - The [transformers](https://github.com/huggingface/transformers) library from huggingface.
-        - `pip install transformers`
+    - `pip install transformers`
 - [gensim](https://radimrehurek.com/gensim/) is used for managing Word2Vec embeddings. This is just for my personal convenience.
-        - `pip install gensim`
+    - `pip install gensim`
 
 ## Disclaimer
 

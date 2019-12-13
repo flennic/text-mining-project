@@ -24,7 +24,7 @@ You will find an example `settings.json` further down this readme.
 
 ## Requirements
 
-I strongly suggest having at least 20GB of free disk space, 16GB of memory and a dedicated graphics card, otherwise you won't have fun running this project. The default settings assume above mentioned requirements and 8GB of VRAM, if you have less, feel free to reduce thge batch sizes. Be aware that training times might drastically increase.
+I strongly suggest having at least 20GB of free disk space, 16GB of memory and a dedicated graphics card, otherwise you won't have much fun running this project. The default settings assume above mentioned requirements and 8GB of VRAM, if you have less, feel free to reduce batch sizes. Be aware that training times might drastically increase.
 
 The preprocessing will take some time, so be patient. Leave the `cache` parameter set to true, so that you only have to do it once.
 

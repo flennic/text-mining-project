@@ -11,6 +11,7 @@ import numpy as np
 
 
 # Default settings. Will be overwritten by parameters set in the configuration file.
+from interactors.FfnBertModelInteractor import FfnBertModelInteractor
 from interactors.FfnWord2VecModelInteractor import FfnWord2VecModelInteractor
 from interactors.LstmWord2VecModelInteractor import LstmWord2VecModelInteractor
 
@@ -53,11 +54,25 @@ settings = {
             "lstm_hidden": 128,
             "lstm_dropout": 0.25,
             "gradient_clip": 5
+        },
+        "ffn_bert": {
+            "data_loader_workers": 1,
+            "batch_size": 256,
+            "learning_rate": 0.5,
+            "epochs": 8,
+            "embedding_size": 768,  # Fixed for Bert, so do not change
+            "dropout": 0.25,
+            "hidden": 256,
+            "max_batches_per_epoch": 16
+        },
+        "lstm_bert": {
+
         }
     },
 
     # General Parameters
     "device": torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+    #"device": torch.device("cpu"),
 
     # Miscellaneous
     "seed": 42,
@@ -89,7 +104,9 @@ except FileNotFoundError:
 # Pre processing
 # Prepare the original data, as it is divided in train and test
 
-pre_process_info = preprocessing.preprocess_w2v(settings)
+pre_process_info = preprocessing.preprocess(settings)
+
+
 
 # Modelling
 if settings["run_model"] == "ffn_w2v":
@@ -102,13 +119,18 @@ elif settings["run_model"] == "lstm_w2v":
         model = LstmWord2VecModelInteractor.load(settings["cached_model_path"])
     else:
         model = LstmWord2VecModelInteractor(settings, pre_process_info)
+elif settings["run_model"] == "ffn_bert":
+    if settings["load_cached_model"]:
+        model = FfnBertModelInteractor.load(settings["cached_model_path"])
+    else:
+        model = FfnBertModelInteractor(settings, pre_process_info)
 else:
-    message = "Model {} is not supported.".format(settings["model_to_use"])
+    message = "Model {} is not supported.".format(settings["run_model"])
     logger.critical(message)
     raise ValueError(message)
 
 
-model._settings["models"]["lstm_w2v"]["epochs"] = settings["models"]["lstm_w2v"]["epochs"]
+#model._settings["models"]["lstm_w2v"]["epochs"] = settings["models"]["lstm_w2v"]["epochs"]
 
 # Training
 model.train()

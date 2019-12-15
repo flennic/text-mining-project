@@ -20,7 +20,7 @@ __padding = None
 
 # noinspection PyProtectedMember
 # noinspection PyTypeChecker,DuplicatedCode,PyUnboundLocalVariable
-def preprocess_w2v(settings):
+def preprocess(settings):
     """
     Pre-processes the original files to indices that can directly be fed to the network. Performs concatenating,
     column-reduction, shuffling, tokenization, padding and vectorization.
@@ -28,10 +28,10 @@ def preprocess_w2v(settings):
     @return: Returns a dictionary containing the paths of the created files and the loaded word embeddings so that they
             can be used in further processing steps if needed.
     """
-    logger.info("Starting to process data for Word2Vec.")
+    logger.info("Starting to process data.")
 
-    l_indicator = "w2v"
-    l_embedding = settings["embeddings"]
+    l_indicator = "w2v" if "w2v" in settings["run_model"] else 'bert'
+    l_embedding = settings["embeddings"] if "w2v" in settings["run_model"] else 'bert'
     l_padding = settings["padding"]
     file_suffix = "i-{}_e-{}_p-{}".format(l_indicator, l_embedding, l_padding)
 
@@ -47,7 +47,7 @@ def preprocess_w2v(settings):
             and os.path.exists(prep_val_path)
             and os.path.exists(prep_test_path)):
 
-        logger.info("Word2Vec data already preprocessed. Doing nothing.")
+        logger.info("Data already preprocessed. Doing nothing.")
 
         return {
             "processed_train_file": prep_train_path,
@@ -88,7 +88,8 @@ def preprocess_w2v(settings):
     __tokenizer = get_tokenizer()
 
     global __embedder
-    __embedder = get_embedder(settings, __tokenizer._unk_token, __tokenizer._pad_token)
+    __embedder = get_embedder(settings, __tokenizer._unk_token, __tokenizer._pad_token)\
+        if "w2v" in settings["run_model"] else None
 
     global __pad_token, __unk_token
     __pad_token = __tokenizer._pad_token
@@ -105,7 +106,13 @@ def preprocess_w2v(settings):
 
     # Parallelising, will work as long as the processing is not too fast and fills the memory :o
     pool = mp.Pool(cores)
-    processed_test = pool.imap(__preprocess, test)
+
+    if "w2v" in settings["run_model"]:
+        processed_test = pool.imap(__preprocess_w2v, test)
+    elif "bert" in settings["run_model"]:
+        processed_test = pool.imap(__preprocess_bert, test)
+    else:
+        raise NotImplemented("Only Word2Vec and Bert embeddings supported.")
 
     with open(prep_test_path, "w") as out_file:
         for X, Y in processed_test:
@@ -121,7 +128,13 @@ def preprocess_w2v(settings):
 
     # Parallelising, will work as long as the processing is not too fast and fills the memory :o
     pool = mp.Pool(cores)
-    processed_val = pool.imap(__preprocess, val)
+
+    if "w2v" in settings["run_model"]:
+        processed_val = pool.imap(__preprocess_w2v, val)
+    elif "bert" in settings["run_model"]:
+        processed_val = pool.imap(__preprocess_bert, val)
+    else:
+        raise NotImplemented("Only Word2Vec and Bert embeddings supported.")
 
     with open(prep_val_path, "w") as out_file:
         for X, Y in processed_val:
@@ -137,7 +150,13 @@ def preprocess_w2v(settings):
 
     # Parallelising, will work as long as the processing is not too fast and fills the memory :o
     pool = mp.Pool(cores)
-    processed_train = pool.imap(__preprocess, train)
+
+    if "w2v" in settings["run_model"]:
+        processed_train = pool.imap(__preprocess_w2v, train)
+    elif "bert" in settings["run_model"]:
+        processed_train = pool.imap(__preprocess_bert, train)
+    else:
+        raise NotImplemented("Only Word2Vec and Bert embeddings supported.")
 
     with open(prep_train_path, "w") as out_file:
         for X, Y in processed_train:
@@ -150,7 +169,10 @@ def preprocess_w2v(settings):
     del train, processed_train, pool
 
     # or return and reuse
-    del __embedder, __tokenizer, __pad_token, __unk_token, __padding
+    if "w2v" in settings["run_model"]:
+        del __embedder
+
+    del __tokenizer, __pad_token, __unk_token, __padding
 
     logger.info("Pre-processing completed.")
 
@@ -188,9 +210,24 @@ def get_tokenizer():
     return BertTokenizer.from_pretrained('bert-base-uncased')
 
 
-def __preprocess(row):
+def __preprocess_bert(row):
     """
     Pre-processes a row by first tokenizing it, then padding it and finding unknown words. Last indices are obtained.
+    For Bert.
+    @param row: A string of text.
+    @return: Returns the indexed sentence and the label.
+    """
+    # row = [label, review]
+
+    sentence_as_int = __tokenizer.encode(row[1], add_special_tokens=False, max_length=__padding, pad_to_max_length=True)
+
+    return sentence_as_int, row[0]
+
+
+def __preprocess_w2v(row):
+    """
+    Pre-processes a row by first tokenizing it, then padding it and finding unknown words. Last indices are obtained.
+    For Word2Vec.
     @param row: A string of text.
     @return: Returns the indexed sentence and the label.
     """

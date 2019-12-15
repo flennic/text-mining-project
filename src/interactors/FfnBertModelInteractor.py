@@ -4,34 +4,30 @@
 import os
 import torch
 import logging
-import numpy as np
-import preprocessing
 
 from datetime import datetime
+from transformers import BertModel
+from models.FfnBert import FfnBert
 from torch.utils.data import DataLoader
-from models.FfnWord2Vec import FfnWord2Vec
 from datasets.AmazonReviewDatasetWord2Vec import AmazonReviewDatasetWord2Vec
 
 logger = logging.getLogger(__name__)
 
 
 # noinspection PyTypeChecker,PyProtectedMember,PyArgumentList,DuplicatedCode
-class FfnWord2VecModelInteractor:
+class FfnBertModelInteractor:
     """Model interactor for storing and managing the PyTorch model. This one implements a simple feed-forward
-    network using word embeddings from Word2Vec for text classification."""
+    network and expects bert embeddings for text classification."""
 
-    def __init__(self, settings, info, load_embeddings=True):
+    def __init__(self, settings, info):
         """
         Creates the interactor object and conducts all required steps, so initialization might take a while.
         @param settings: A dictionary that provides all required keys. See example config file for all option.
         @param info: A dictionary that contains the paths to the preprocessed files and optionally the embedded
                         word vectors if already loaded, so that they can be reused.
-        @param load_embeddings: If set to false, word vectors are never loaded. If none are available, the embeddings
-                        layer will be filled with just zeros. Might come in handy when loading a model where the
-                        embeddings are overwritten anyways.
         """
 
-        logger.info("Initializing FnnWord2Vec model interactor.")
+        logger.info("Initializing FnnBert model interactor.")
 
         # Saving settings
         self._settings = settings
@@ -55,50 +51,40 @@ class FfnWord2VecModelInteractor:
 
         # Creating (lazy) data loaders
         self._dataloader_train = DataLoader(self._train_data,
-                                            batch_size=settings["models"]["ffn_w2v"]["batch_size"],
-                                            num_workers=settings["models"]["ffn_w2v"]["data_loader_workers"],
+                                            batch_size=settings["models"]["ffn_bert"]["batch_size"],
+                                            num_workers=settings["models"]["ffn_bert"]["data_loader_workers"],
                                             collate_fn=self.__batch2tensor__)
 
         self._dataloader_val = DataLoader(self._val_data,
-                                          batch_size=settings["models"]["ffn_w2v"]["batch_size"],
-                                          num_workers=settings["models"]["ffn_w2v"]["data_loader_workers"],
+                                          batch_size=settings["models"]["ffn_bert"]["batch_size"],
+                                          num_workers=settings["models"]["ffn_bert"]["data_loader_workers"],
                                           collate_fn=self.__batch2tensor__)
 
         self._dataloader_test = DataLoader(self._test_data,
-                                           batch_size=settings["models"]["ffn_w2v"]["batch_size"],
-                                           num_workers=settings["models"]["ffn_w2v"]["data_loader_workers"],
+                                           batch_size=settings["models"]["ffn_bert"]["batch_size"],
+                                           num_workers=settings["models"]["ffn_bert"]["data_loader_workers"],
                                            collate_fn=self.__batch2tensor__)
 
         logger.info("Creating model.")
 
+        # Loading Bert
+        self._bert_model = BertModel.from_pretrained('bert-base-uncased').cuda()
+        self._bert_model = self._bert_model.to(settings["device"])
+
         # Creating network
-        if info.get("embedded_vectors") is None and load_embeddings:
-            logger.info("Embedded vectors not preloaded. Have to load word embeddings for model.")
-            tokenizer = preprocessing.get_tokenizer()
-            self._info["embedded_vectors"] =\
-                preprocessing.get_embedder(settings, tokenizer._unk_token, tokenizer._pad_token).vectors
-
-        if info.get("embedded_vectors") is None and not load_embeddings:
-            logger.info("Embedded vectors not requested, filling with zeros.")
-            # noinspection PyUnusedLocal
-            tokenizer = None
-            self._info["embedded_vectors"] = np.zeros((settings["embeddings"]+2,
-                                                       settings["models"]["ffn_w2v"]["embedding_size"]))
-
-        self._model = FfnWord2Vec(
-            word_embeddings=torch.FloatTensor(self._info["embedded_vectors"]),
-            embedding_size=self._settings["models"]["ffn_w2v"]["embedding_size"],
+        self._model = FfnBert(
+            embedding_size=self._settings["models"]["ffn_bert"]["embedding_size"],
             padding=self._settings["padding"],
             category_amount=self._settings["categories"],
-            dropout=self._settings["models"]["ffn_w2v"]["dropout"],
-            hidden=self._settings["models"]["ffn_w2v"]["hidden"]
+            dropout=self._settings["models"]["ffn_bert"]["dropout"],
+            hidden=self._settings["models"]["ffn_bert"]["hidden"]
         )
 
         # noinspection PyUnresolvedReferences
         self._model = self._model.to(settings["device"])
 
         # Tokenizer and Embedder not needed any more
-        del tokenizer, info["embedded_vectors"]
+        #del tokenizer, info["embedded_vectors"]
 
         logger.info("Model created.")
 
@@ -123,21 +109,28 @@ class FfnWord2VecModelInteractor:
         processing. Losses and accuracies are saved within the object.
         """
 
-        logger.info("Beginning training of model (FNN, Word2Vec).")
+        logger.info("Beginning training of model (FNN, Bert).")
 
         self._optimizer = torch.optim.Adam(self._model.parameters(),
-                                           lr=self._settings["models"]["ffn_w2v"]["learning_rate"])
+                                           lr=self._settings["models"]["ffn_bert"]["learning_rate"])
         self._criterion = torch.nn.NLLLoss()
 
-        while self._trained_epochs < self._settings["models"]["ffn_w2v"]["epochs"]:
+        while self._trained_epochs < self._settings["models"]["ffn_bert"]["epochs"]:
 
             training_loss = 0
             training_accuracy = 0
 
+            no_processed_train = 0
+
             for x, y in self._dataloader_train:
+
+                no_processed_train += 1
 
                 x = x.to(self._settings["device"])
                 y = y.to(self._settings["device"])
+
+                with torch.no_grad():
+                    x = self._bert_model(x)[0]
 
                 # Reset Gradients
                 self._optimizer.zero_grad()
@@ -152,36 +145,64 @@ class FfnWord2VecModelInteractor:
                 training_loss += loss.item()
                 training_accuracy += torch.sum(torch.exp(output).topk(1)[1].view(-1) == y).item()
 
-            else:
+                #no_processed_train = no_processed_train + self._settings["models"]["ffn_bert"]["batch_size"]
+                #print(no_processed / self._train_data.length)
+                print(no_processed_train)
+                if no_processed_train >= self._settings["models"]["ffn_bert"]["max_batches_per_epoch"]:
+                    break
 
-                self._trained_epochs += 1
+            print(training_accuracy / (self._settings["models"]["ffn_bert"]["batch_size"] * no_processed_train))
 
-                validation_loss = 0
-                validation_accuracy = 0
+            #else:
 
-                self._model.eval()
+            self._trained_epochs += 1
 
-                with torch.no_grad():
+            validation_loss = 0
+            validation_accuracy = 0
 
-                    for x, y in self._dataloader_val:
+            self._model.eval()
 
-                        x = x.to(self._settings["device"])
-                        y = y.to(self._settings["device"])
+            with torch.no_grad():
 
-                        output_validation = self._model(x)
-                        loss_val = self._criterion(output_validation, y)
-                        validation_loss += loss_val.item()
-                        validation_accuracy += torch.sum(
-                            torch.exp(output_validation).topk(1, dim=1)[1].view(-1) == y).item()
+                no_processed_val = 0
 
-                training_loss /= (self._train_data.length *
-                                  self._settings["models"]["ffn_w2v"]["data_loader_workers"])
-                training_accuracy /= (self._train_data.length *
-                                      self._settings["models"]["ffn_w2v"]["data_loader_workers"])
-                validation_loss /= (self._val_data.length *
-                                    self._settings["models"]["ffn_w2v"]["data_loader_workers"])
-                validation_accuracy /= (self._val_data.length *
-                                        self._settings["models"]["ffn_w2v"]["data_loader_workers"])
+                for x, y in self._dataloader_val:
+
+                    no_processed_val += 1
+
+                    x = x.to(self._settings["device"])
+                    y = y.to(self._settings["device"])
+
+                    x = self._bert_model(x)[0]
+
+                    output_validation = self._model(x)
+                    loss_val = self._criterion(output_validation, y)
+                    validation_loss += loss_val.item()
+                    validation_accuracy += torch.sum(
+                        torch.exp(output_validation).topk(1, dim=1)[1].view(-1) == y).item()
+
+                    #no_processed_val = no_processed_val + self._settings["models"]["ffn_bert"]["batch_size"]
+
+                    print(no_processed_val)
+
+                    if no_processed_val >= self._settings["models"]["ffn_bert"]["max_batches_per_epoch"]:
+                        break
+
+                print(validation_accuracy / (self._settings["models"]["ffn_bert"]["batch_size"] * no_processed_val))
+
+                #training_loss /= (self._train_data.length *
+                #                  self._settings["models"]["ffn_bert"]["data_loader_workers"])
+                #training_accuracy /= (self._train_data.length *
+                #                      self._settings["models"]["ffn_bert"]["data_loader_workers"])
+                #validation_loss /= (self._val_data.length *
+                #                    self._settings["models"]["ffn_bert"]["data_loader_workers"])
+                #validation_accuracy /= (self._val_data.length *
+                #                        self._settings["models"]["ffn_bert"]["data_loader_workers"])
+
+                training_loss /= (no_processed_train * self._settings["models"]["ffn_bert"]["batch_size"])
+                training_accuracy /= (no_processed_train * self._settings["models"]["ffn_bert"]["batch_size"])
+                validation_loss /= (no_processed_val * self._settings["models"]["ffn_bert"]["batch_size"])
+                validation_accuracy /= (no_processed_val * self._settings["models"]["ffn_bert"]["batch_size"])
 
                 # Saving metrics
                 self.train_losses.append(training_loss)
@@ -190,7 +211,7 @@ class FfnWord2VecModelInteractor:
                 self.validation_accuracies.append(validation_accuracy)
 
                 logger.info("\n\nEpoch: {}/{}\n".format(self._trained_epochs,
-                                                        self._settings["models"]["ffn_w2v"]["epochs"]) +
+                                                        self._settings["models"]["ffn_bert"]["epochs"]) +
                             "Training Loss: {:.6f}\n".format(training_loss) +
                             "Training Accuracy: {:.3f}\n".format(training_accuracy) +
                             "Validation Loss: {:.6f}\n".format(validation_loss) +

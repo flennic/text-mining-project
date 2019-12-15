@@ -33,7 +33,17 @@
             "lstm_hidden": 128,
             "lstm_dropout": 0.25,
             "gradient_clip": 5
-        }
+        },
+        "ffn_bert": {
+            "data_loader_workers": 1,
+            "batch_size": 256,
+            "learning_rate": 0.5,
+            "epochs": 8,
+            "embedding_size": 768,  # Fixed for Bert, so do not change
+            "dropout": 0.25,
+            "hidden": 256,
+            "max_batches_per_epoch": 16
+        },
     },
 
     "seed": 42,

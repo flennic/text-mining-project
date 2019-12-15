@@ -105,7 +105,7 @@ class LstmWord2VecModelInteractor:
     @staticmethod
     def __batch2tensor__(batch):
         """
-        Takes a batch ans transforms it in such a way that it can directly be fed to the network.
+        Takes a batch and transforms it in such a way that it can directly be fed to the network.
         @param batch: List of x and y labels.
         @return: Two tensors, one for x and one for y.
         """

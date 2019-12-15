@@ -29,7 +29,7 @@ settings = {
     "embeddings": 1_000_000,
     "categories": 5,
     "run_model": "lstm_w2v",
-    "load_cached_model": True,
+    "load_cached_model": False,
 
     # Models
     "models": {
@@ -43,10 +43,10 @@ settings = {
             "hidden": 256
         },
         "lstm_w2v": {
-            "data_loader_workers": 4,
+            "data_loader_workers": 2,
             "batch_size": 1024,
-            "learning_rate": 0.05,
-            "epochs": 1,
+            "learning_rate": 0.002,
+            "epochs": 2,
             "embedding_size": 300,  # Fixed for Word2Vec, so do not change
             "dropout": 0.25,
             "lstm_layers": 2,
@@ -106,6 +106,9 @@ else:
     message = "Model {} is not supported.".format(settings["model_to_use"])
     logger.critical(message)
     raise ValueError(message)
+
+
+model._settings["models"]["lstm_w2v"]["epochs"] = settings["models"]["lstm_w2v"]["epochs"]
 
 # Training
 model.train()

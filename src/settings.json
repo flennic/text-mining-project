@@ -2,7 +2,7 @@
     "orig_train_path": "data/original/train.csv",
     "orig_test_path": "data/original/test.csv",
     "processed_data_folder": "data/processed/",
-    "cached_model_path": "checkpoints/2019-12-12_22-9_LstmWord2VecModelInteractor.pth",
+    "cached_model_path": "checkpoints/2019-12-14_16-4_LstmWord2VecModelInteractor.pth",
 
     "word2vec_path": "data/embeddings/GoogleNews-vectors-negative300.bin",
     "splits": [0.85, 0.1, 0.05],
@@ -23,10 +23,10 @@
             "hidden": 256
         },
         "lstm_w2v": {
-            "data_loader_workers": 4,
+            "data_loader_workers": 2,
             "batch_size": 1024,
-            "learning_rate": 0.05,
-            "epochs": 1,
+            "learning_rate": 0.001,
+            "epochs": 10,
             "embedding_size": 300,
             "dropout": 0.25,
             "lstm_layers": 2,

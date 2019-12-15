@@ -119,6 +119,7 @@ class FfnWord2VecModelInteractor:
         Trains the model until the number of epochs in settings for the model is reached. Prints metrics while
         processing. Losses and accuracies are saved within the object.
         """
+
         logger.info("Beginning training of model (FNN, Word2Vec).")
 
         self._optimizer = torch.optim.Adam(self._model.parameters(),

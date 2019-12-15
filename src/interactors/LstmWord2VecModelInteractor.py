@@ -122,6 +122,8 @@ class LstmWord2VecModelInteractor:
         processing. Losses and accuracies are saved within the object.
         """
 
+        no_batch = 0
+
         logger.info("Beginning training of model. (LSTM, Word2Vec)")
 
         self._optimizer = torch.optim.Adam(self._model.parameters(),
@@ -134,6 +136,11 @@ class LstmWord2VecModelInteractor:
             training_accuracy = 0
 
             for x, y in self._dataloader_train:
+
+                no_batch += 1
+
+                # Initialize hidden states in each epoch
+                self._model.init_hidden(x.shape[0])
 
                 x = x.to(self._settings["device"])
                 y = y.to(self._settings["device"])
@@ -153,6 +160,11 @@ class LstmWord2VecModelInteractor:
                 training_loss += loss.item()
                 training_accuracy += torch.sum(torch.exp(output).topk(1)[1].view(-1) == y).item()
 
+                #if no_batch % 100 == 0:
+                #    print("Loss {}".format(loss.item()))
+                #    print("Accuracy: {}".format(torch.sum(torch.exp(output).topk(1)[1].view(-1) == y).item() / self._settings["models"]["ffn_w2v"]["batch_size"] /
+                #                                self._settings["models"]["lstm_w2v"]["data_loader_workers"]))
+
             else:
 
                 self._trained_epochs += 1
@@ -165,6 +177,8 @@ class LstmWord2VecModelInteractor:
                 with torch.no_grad():
 
                     for x, y in self._dataloader_val:
+                        # Initialize hidden states in each epoch
+                        self._model.init_hidden(x.shape[0])
 
                         x = x.to(self._settings["device"])
                         y = y.to(self._settings["device"])

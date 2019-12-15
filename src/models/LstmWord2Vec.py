@@ -17,6 +17,7 @@ class LstmWord2Vec(nn.Module):
 
         self.lstm_layers = lstm_layers
         self.lstm_hidden = lstm_hidden
+        self.lstm_hidden_states = None
 
         # Predefined word embeddings
         self.embedding = nn.Embedding.from_pretrained(word_embeddings)
@@ -37,11 +38,14 @@ class LstmWord2Vec(nn.Module):
         self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
-        hidden = self.init_hidden(x.shape[0])
+
+        # Decouple from training history
+        self.lstm_hidden_states = tuple([each.data for each in self.lstm_hidden_states])
 
         # Pass the input tensor through each of our operations
         x = self.embedding(x)
-        x, hidden = self.lstm(x, hidden)
+        # noinspection PyTypeChecker
+        x, self.lstm_hidden_states = self.lstm(x, self.lstm_hidden_states)
         x = self.dropout(x)
         x = x.reshape(x.shape[0], -1)
         x = self.l1(x)
@@ -56,7 +60,5 @@ class LstmWord2Vec(nn.Module):
         # initialized to zero, for hidden state and cell state of LSTM
         weight = next(self.parameters()).data
 
-        hidden = (weight.new(self.lstm_layers, batch_size, self.lstm_hidden).zero_().cuda(),
-                  weight.new(self.lstm_layers, batch_size, self.lstm_hidden).zero_().cuda())
-
-        return hidden
+        self.lstm_hidden_states = (weight.new(self.lstm_layers, batch_size, self.lstm_hidden).zero_().cuda(),
+                                   weight.new(self.lstm_layers, batch_size, self.lstm_hidden).zero_().cuda())

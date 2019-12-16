@@ -9,8 +9,8 @@
     "padding": 200,
     "embeddings": 1000000,
     "categories": 5,
-    "run_model": "ffn_bert",
-    "load_cached_model": true,
+    "run_model": "lstm_bert",
+    "load_cached_model": false,
 
     "models": {
         "ffn_w2v": {
@@ -43,6 +43,18 @@
             "dropout": 0.25,
             "hidden": 256,
             "max_batches_per_epoch": 64
+        },
+        "lstm_bert": {
+            "data_loader_workers": 1,
+            "batch_size": 256,
+            "learning_rate": 0.0001,
+            "epochs": 1,
+            "embedding_size": 768,
+            "dropout": 0.25,
+            "lstm_layers": 2,
+            "lstm_hidden": 128,
+            "lstm_dropout": 0.25,
+            "gradient_clip": 5
         }
     },
 

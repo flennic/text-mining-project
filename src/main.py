@@ -14,6 +14,7 @@ import numpy as np
 from interactors.FfnBertModelInteractor import FfnBertModelInteractor
 from interactors.FfnWord2VecModelInteractor import FfnWord2VecModelInteractor
 from interactors.LstmWord2VecModelInteractor import LstmWord2VecModelInteractor
+from interactors.LstmBertModelInteractor import LstmBertModelInteractor
 
 settings = {
     # Data Processing
@@ -66,7 +67,16 @@ settings = {
             "max_batches_per_epoch": 16
         },
         "lstm_bert": {
-
+            "data_loader_workers": 1,
+            "batch_size": 256,
+            "learning_rate": 0.002,
+            "epochs": 2,
+            "embedding_size": 769,  # Fixed for Bert, so do not change
+            "dropout": 0.25,
+            "lstm_layers": 2,
+            "lstm_hidden": 128,
+            "lstm_dropout": 0.25,
+            "gradient_clip": 5
         }
     },
 
@@ -106,7 +116,6 @@ except FileNotFoundError:
 pre_process_info = preprocessing.preprocess(settings)
 
 
-
 # Modelling
 if settings["run_model"] == "ffn_w2v":
     if settings["load_cached_model"]:
@@ -123,6 +132,11 @@ elif settings["run_model"] == "ffn_bert":
         model = FfnBertModelInteractor.load(settings["cached_model_path"])
     else:
         model = FfnBertModelInteractor(settings, pre_process_info)
+elif settings["run_model"] == "lstm_bert":
+    if settings["load_cached_model"]:
+        model = LstmBertModelInteractor.load(settings["cached_model_path"])
+    else:
+        model = LstmBertModelInteractor(settings, pre_process_info)
 else:
     message = "Model {} is not supported.".format(settings["run_model"])
     logger.critical(message)

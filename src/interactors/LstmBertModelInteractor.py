@@ -8,15 +8,16 @@ import numpy as np
 import preprocessing
 
 from datetime import datetime
+from transformers import DistilBertModel
 from torch.utils.data import DataLoader
-from models.LstmWord2Vec import LstmWord2Vec
+from models.LstmBert import LstmBert
 from datasets.AmazonReviewDataset import AmazonReviewDataset
 
 logger = logging.getLogger(__name__)
 
 
 # noinspection PyTypeChecker,PyProtectedMember,PyArgumentList,DuplicatedCode
-class LstmWord2VecModelInteractor:
+class LstmBertModelInteractor:
     """Model interactor for storing and managing the PyTorch model. This one implements an lstm network using
             word embeddings from Word2Vec for text classification."""
 
@@ -30,7 +31,7 @@ class LstmWord2VecModelInteractor:
                         layer will be filled with just zeros. Might come in handy when loading a model where the
                         embeddings are overwritten anyways.
         """
-        logger.info("Initializing LstmWord2Vec model interactor.")
+        logger.info("Initializing LstmBert model interactor.")
 
         # Saving settings
         self._settings = settings
@@ -54,50 +55,37 @@ class LstmWord2VecModelInteractor:
 
         # Creating (lazy) data loaders
         self._dataloader_train = DataLoader(self._train_data,
-                                            batch_size=settings["models"]["lstm_w2v"]["batch_size"],
-                                            num_workers=settings["models"]["lstm_w2v"]["data_loader_workers"],
+                                            batch_size=settings["models"]["lstm_bert"]["batch_size"],
+                                            num_workers=settings["models"]["lstm_bert"]["data_loader_workers"],
                                             collate_fn=self.__batch2tensor__)
 
         self._dataloader_val = DataLoader(self._val_data,
-                                          batch_size=settings["models"]["lstm_w2v"]["batch_size"],
-                                          num_workers=settings["models"]["lstm_w2v"]["data_loader_workers"],
+                                          batch_size=settings["models"]["lstm_bert"]["batch_size"],
+                                          num_workers=settings["models"]["lstm_bert"]["data_loader_workers"],
                                           collate_fn=self.__batch2tensor__)
 
         self._dataloader_test = DataLoader(self._test_data,
-                                           batch_size=settings["models"]["lstm_w2v"]["batch_size"],
-                                           num_workers=settings["models"]["lstm_w2v"]["data_loader_workers"],
+                                           batch_size=settings["models"]["lstm_bert"]["batch_size"],
+                                           num_workers=settings["models"]["lstm_bert"]["data_loader_workers"],
                                            collate_fn=self.__batch2tensor__)
 
         logger.info("Creating model.")
 
-        # Creating network
-        if info.get("embedded_vectors") is None and load_embeddings:
-            logger.info("Embedded vectors not preloaded. Have to load word embeddings for model.")
-            tokenizer = preprocessing.get_tokenizer()
-            self._info["embedded_vectors"] =\
-                preprocessing.get_embedder(settings, tokenizer._unk_token, tokenizer._pad_token).vectors
+        # Loading Bert
+        self._bert_model = DistilBertModel.from_pretrained('distilbert-base-uncased')
+        self._bert_model = self._bert_model.to(settings["device"])
 
-        if info.get("embedded_vectors") is None and not load_embeddings:
-            # noinspection PyUnusedLocal
-            tokenizer = None
-            self._info["embedded_vectors"] = np.zeros((settings["embeddings"]+2,
-                                                       settings["models"]["ffn_w2v"]["embedding_size"]))
-
-        self._model = LstmWord2Vec(
-            word_embeddings=torch.FloatTensor(self._info["embedded_vectors"]),
-            embedding_size=self._settings["models"]["lstm_w2v"]["embedding_size"],
+        self._model = LstmBert(
+            embedding_size=self._settings["models"]["lstm_bert"]["embedding_size"],
             padding=self._settings["padding"],
             category_amount=self._settings["categories"],
-            lstm_layers=self._settings["models"]["lstm_w2v"]["lstm_layers"],
-            lstm_hidden=self._settings["models"]["lstm_w2v"]["lstm_hidden"],
-            dropout=self._settings["models"]["lstm_w2v"]["dropout"],
-            lstm_dropout=self._settings["models"]["lstm_w2v"]["lstm_dropout"])
+            lstm_layers=self._settings["models"]["lstm_bert"]["lstm_layers"],
+            lstm_hidden=self._settings["models"]["lstm_bert"]["lstm_hidden"],
+            dropout=self._settings["models"]["lstm_bert"]["dropout"],
+            lstm_dropout=self._settings["models"]["lstm_bert"]["lstm_dropout"])
 
         # noinspection PyUnresolvedReferences
         self._model = self._model.to(settings["device"])
-
-        # Tokenizer and Embedder not needed any more
-        del tokenizer, info["embedded_vectors"]
 
         logger.info("Model created.")
 
@@ -122,13 +110,13 @@ class LstmWord2VecModelInteractor:
         processing. Losses and accuracies are saved within the object.
         """
 
-        logger.info("Beginning training of model. (LSTM, Word2Vec)")
+        logger.info("Beginning training of model. (LSTM, Bert)")
 
         self._optimizer = torch.optim.Adam(self._model.parameters(),
-                                           lr=self._settings["models"]["lstm_w2v"]["learning_rate"])
+                                           lr=self._settings["models"]["lstm_bert"]["learning_rate"])
         self._criterion = torch.nn.NLLLoss()
 
-        while self._trained_epochs < self._settings["models"]["lstm_w2v"]["epochs"]:
+        while self._trained_epochs < self._settings["models"]["lstm_bert"]["epochs"]:
 
             training_loss = 0
             training_accuracy = 0
@@ -144,6 +132,9 @@ class LstmWord2VecModelInteractor:
                 x = x.to(self._settings["device"])
                 y = y.to(self._settings["device"])
 
+                with torch.no_grad():
+                    x = self._bert_model(x)[0]
+
                 # Reset Gradients
                 self._optimizer.zero_grad()
 
@@ -152,7 +143,7 @@ class LstmWord2VecModelInteractor:
                 loss = self._criterion(output, y)
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(self._model.parameters(),
-                                               self._settings["models"]["lstm_w2v"]["gradient_clip"])
+                                               self._settings["models"]["lstm_bert"]["gradient_clip"])
                 self._optimizer.step()
 
                 # Calculate Metrics
@@ -160,10 +151,10 @@ class LstmWord2VecModelInteractor:
                 training_accuracy += torch.sum(torch.exp(output).topk(1)[1].view(-1) == y).item()
 
                 # Print metrics at each 1/info_density step
-                info_density = 20
-                batch_size = self._settings["models"]["lstm_w2v"]["batch_size"]
-                epochs = self._settings["models"]["lstm_w2v"]["epochs"]
-                data_loaders = self._settings["models"]["lstm_w2v"]["data_loader_workers"]
+                info_density = 200
+                batch_size = self._settings["models"]["lstm_bert"]["batch_size"]
+                epochs = self._settings["models"]["lstm_bert"]["epochs"]
+                data_loaders = self._settings["models"]["lstm_bert"]["data_loader_workers"]
 
                 if processed_batches % round(self._train_data.length / info_density / batch_size * data_loaders) == 0:
                     time = datetime.now()
@@ -195,6 +186,8 @@ class LstmWord2VecModelInteractor:
                         x = x.to(self._settings["device"])
                         y = y.to(self._settings["device"])
 
+                        x = self._bert_model(x)[0]
+
                         output_validation = self._model(x)
                         loss_val = self._criterion(output_validation, y)
                         validation_loss += loss_val.item()
@@ -202,13 +195,13 @@ class LstmWord2VecModelInteractor:
                             torch.exp(output_validation).topk(1, dim=1)[1].view(-1) == y).item()
 
                 training_loss /= (self._train_data.length *
-                                  self._settings["models"]["lstm_w2v"]["data_loader_workers"])
+                                  self._settings["models"]["lstm_bert"]["data_loader_workers"])
                 training_accuracy /= (self._train_data.length *
-                                      self._settings["models"]["lstm_w2v"]["data_loader_workers"])
+                                      self._settings["models"]["lstm_bert"]["data_loader_workers"])
                 validation_loss /= (self._val_data.length *
-                                    self._settings["models"]["lstm_w2v"]["data_loader_workers"])
+                                    self._settings["models"]["lstm_bert"]["data_loader_workers"])
                 validation_accuracy /= (self._val_data.length *
-                                        self._settings["models"]["lstm_w2v"]["data_loader_workers"])
+                                        self._settings["models"]["lstm_bert"]["data_loader_workers"])
 
                 # Saving metrics
                 self.train_losses.append(training_loss)
@@ -217,7 +210,7 @@ class LstmWord2VecModelInteractor:
                 self.validation_accuracies.append(validation_accuracy)
 
                 logger.info("\n\nEpoch: {}/{}\n".format(self._trained_epochs,
-                                                        self._settings["models"]["lstm_w2v"]["epochs"]) +
+                                                        self._settings["models"]["lstm_bert"]["epochs"]) +
                             "Training Loss: {:.6f}\n".format(training_loss) +
                             "Training Accuracy: {:.3f}\n".format(training_accuracy) +
                             "Validation Loss: {:.6f}\n".format(validation_loss) +
@@ -270,7 +263,7 @@ class LstmWord2VecModelInteractor:
 
         checkpoint = torch.load(filepath)
 
-        interactor = LstmWord2VecModelInteractor(checkpoint["settings"], checkpoint["info"], load_embeddings=False)
+        interactor = LstmBertModelInteractor(checkpoint["settings"], checkpoint["info"], load_embeddings=False)
 
         interactor._model.load_state_dict(checkpoint['state_dict'])
         interactor._trained_epochs = checkpoint["trained_epochs"]

@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class AmazonReviewDatasetWord2Vec(IterableDataset):
+class AmazonReviewDataset(IterableDataset):
     """Represents the data set 'Amazon Reviews for Sentiment Analysis' found at Kaggle:
     https://www.kaggle.com/bittlingmayer/amazonreviews/kernels
     It's implemented as an iterable data set as the data is quite large and does not necessarily fit to memory."""

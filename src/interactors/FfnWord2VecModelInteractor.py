@@ -10,7 +10,7 @@ import preprocessing
 from datetime import datetime
 from torch.utils.data import DataLoader
 from models.FfnWord2Vec import FfnWord2Vec
-from datasets.AmazonReviewDatasetWord2Vec import AmazonReviewDatasetWord2Vec
+from datasets.AmazonReviewDataset import AmazonReviewDataset
 
 logger = logging.getLogger(__name__)
 
@@ -47,9 +47,9 @@ class FfnWord2VecModelInteractor:
         logger.info("Creating data sets.")
 
         # Creating data sets
-        self._train_data = AmazonReviewDatasetWord2Vec(info["processed_train_file"])
-        self._val_data = AmazonReviewDatasetWord2Vec(info["processed_val_file"])
-        self._test_data = AmazonReviewDatasetWord2Vec(info["processed_test_file"])
+        self._train_data = AmazonReviewDataset(info["processed_train_file"])
+        self._val_data = AmazonReviewDataset(info["processed_val_file"])
+        self._test_data = AmazonReviewDataset(info["processed_test_file"])
 
         logger.info("Creating data loaders.")
 

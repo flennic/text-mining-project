@@ -133,10 +133,10 @@ else:
 #model._settings["models"]["lstm_w2v"]["epochs"] = settings["models"]["lstm_w2v"]["epochs"]
 
 # Training
-model.train()
+#model.train()
 
 # Saving
-model.save()
+#model.save()
 
 # Testing
 

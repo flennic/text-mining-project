@@ -5,7 +5,7 @@ import pandas as pd
 import logging
 import os
 import numpy as np
-from transformers import BertTokenizer
+from transformers import DistilBertTokenizer
 import multiprocessing as mp
 import gensim
 
@@ -207,7 +207,7 @@ def get_tokenizer():
     Loads the pre-trained tokenizer 'bert-base-uncased' from the transformers library.
     @return: Returns the tokenizer provided by the transformers library.
     """
-    return BertTokenizer.from_pretrained('bert-base-uncased')
+    return DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
 
 
 def __preprocess_bert(row):
@@ -219,7 +219,7 @@ def __preprocess_bert(row):
     """
     # row = [label, review]
 
-    sentence_as_int = __tokenizer.encode(row[1], add_special_tokens=False, max_length=__padding, pad_to_max_length=True)
+    sentence_as_int = __tokenizer.encode(row[1], add_special_tokens=True, max_length=__padding, pad_to_max_length=True)
 
     return sentence_as_int, row[0]
 

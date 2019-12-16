@@ -134,6 +134,9 @@ class FfnWord2VecModelInteractor:
             training_loss = 0
             training_accuracy = 0
 
+            processed_batches = 0
+            print_every = self._train_data.length / self._settings["models"]["ffn_w2v"]["batch_size"]
+
             for x, y in self._dataloader_train:
 
                 x = x.to(self._settings["device"])

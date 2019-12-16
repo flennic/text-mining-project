@@ -43,7 +43,7 @@
             "dropout": 0.25,
             "hidden": 256,
             "max_batches_per_epoch": 16
-        },
+        }
     },
 
     "seed": 42,

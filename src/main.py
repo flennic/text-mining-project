@@ -135,7 +135,7 @@ else:
 model.train()
 
 # Saving
-#model.save()
+model.save()
 
 # Testing
 

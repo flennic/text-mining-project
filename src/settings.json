@@ -9,7 +9,7 @@
     "padding": 200,
     "embeddings": 1000000,
     "categories": 5,
-    "run_model": "lstm_w2v",
+    "run_model": "ffn_bert",
     "load_cached_model": true,
 
     "models": {

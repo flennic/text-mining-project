@@ -72,7 +72,6 @@ settings = {
 
     # General Parameters
     "device": torch.device("cuda" if torch.cuda.is_available() else "cpu"),
-    #"device": torch.device("cpu"),
 
     # Miscellaneous
     "seed": 42,
@@ -133,7 +132,7 @@ else:
 #model._settings["models"]["lstm_w2v"]["epochs"] = settings["models"]["lstm_w2v"]["epochs"]
 
 # Training
-#model.train()
+model.train()
 
 # Saving
 #model.save()

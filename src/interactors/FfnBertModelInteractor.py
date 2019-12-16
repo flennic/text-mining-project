@@ -68,7 +68,7 @@ class FfnBertModelInteractor:
         logger.info("Creating model.")
 
         # Loading Bert
-        self._bert_model = DistilBertModel.from_pretrained('bert-base-uncased').cuda()
+        self._bert_model = DistilBertModel.from_pretrained('distilbert-base-uncased')
         self._bert_model = self._bert_model.to(settings["device"])
 
         # Creating network
@@ -82,9 +82,6 @@ class FfnBertModelInteractor:
 
         # noinspection PyUnresolvedReferences
         self._model = self._model.to(settings["device"])
-
-        # Tokenizer and Embedder not needed any more
-        #del tokenizer, info["embedded_vectors"]
 
         logger.info("Model created.")
 
@@ -119,12 +116,11 @@ class FfnBertModelInteractor:
 
             training_loss = 0
             training_accuracy = 0
-
-            no_processed_train = 0
+            processed_batches = 0
 
             for x, y in self._dataloader_train:
 
-                no_processed_train += 1
+                processed_batches += 1
 
                 x = x.to(self._settings["device"])
                 y = y.to(self._settings["device"])
@@ -145,79 +141,77 @@ class FfnBertModelInteractor:
                 training_loss += loss.item()
                 training_accuracy += torch.sum(torch.exp(output).topk(1)[1].view(-1) == y).item()
 
-                #no_processed_train = no_processed_train + self._settings["models"]["ffn_bert"]["batch_size"]
-                #print(no_processed / self._train_data.length)
-                print(no_processed_train)
-                if no_processed_train >= self._settings["models"]["ffn_bert"]["max_batches_per_epoch"]:
+                # Print metrics at each 1/info_density step
+                info_density = 100
+                batch_size = self._settings["models"]["ffn_bert"]["batch_size"]
+                epochs = self._settings["models"]["ffn_bert"]["epochs"]
+                data_loaders = self._settings["models"]["ffn_bert"]["data_loader_workers"]
+
+                if processed_batches % round(self._train_data.length / info_density / batch_size * data_loaders) == 0:
+                    time = datetime.now()
+                    logger.info("\n\nEpoch: {}/{} - {}%\n".format(self._trained_epochs, epochs, round(
+                        100 * processed_batches * batch_size / self._train_data.length / data_loaders, 1)) +
+                                "Training Loss: {:.6f}\n".format(training_loss / (processed_batches * batch_size)) +
+                                "Training Accuracy: {:.3f}\n".format(
+                                    training_accuracy / (processed_batches * batch_size)) +
+                                "Time: {}-{}-{} {}:{:02d}".format(time.year, time.month, time.day, time.hour,
+                                                                  time.minute))
+                    self.save()
                     break
 
-            print(training_accuracy / (self._settings["models"]["ffn_bert"]["batch_size"] * no_processed_train))
+            else:
 
-            #else:
+                logger.info("Evaluating on validation set.")
 
-            self._trained_epochs += 1
+                self._trained_epochs += 1
 
-            validation_loss = 0
-            validation_accuracy = 0
+                validation_loss = 0
+                validation_accuracy = 0
 
-            self._model.eval()
+                self._model.eval()
 
-            with torch.no_grad():
+                with torch.no_grad():
 
-                no_processed_val = 0
+                    no_processed_val = 0
 
-                for x, y in self._dataloader_val:
+                    for x, y in self._dataloader_val:
 
-                    no_processed_val += 1
+                        no_processed_val += 1
 
-                    x = x.to(self._settings["device"])
-                    y = y.to(self._settings["device"])
+                        x = x.to(self._settings["device"])
+                        y = y.to(self._settings["device"])
 
-                    x = self._bert_model(x)[0]
+                        x = self._bert_model(x)[0]
 
-                    output_validation = self._model(x)
-                    loss_val = self._criterion(output_validation, y)
-                    validation_loss += loss_val.item()
-                    validation_accuracy += torch.sum(
-                        torch.exp(output_validation).topk(1, dim=1)[1].view(-1) == y).item()
+                        output_validation = self._model(x)
+                        loss_val = self._criterion(output_validation, y)
+                        validation_loss += loss_val.item()
+                        validation_accuracy += torch.sum(
+                            torch.exp(output_validation).topk(1, dim=1)[1].view(-1) == y).item()
 
-                    #no_processed_val = no_processed_val + self._settings["models"]["ffn_bert"]["batch_size"]
+                    training_loss /= (self._train_data.length *
+                                      self._settings["models"]["ffn_bert"]["data_loader_workers"])
+                    training_accuracy /= (self._train_data.length *
+                                          self._settings["models"]["ffn_bert"]["data_loader_workers"])
+                    validation_loss /= (self._val_data.length *
+                                        self._settings["models"]["ffn_bert"]["data_loader_workers"])
+                    validation_accuracy /= (self._val_data.length *
+                                            self._settings["models"]["ffn_bert"]["data_loader_workers"])
 
-                    print(no_processed_val)
+                    # Saving metrics
+                    self.train_losses.append(training_loss)
+                    self.train_accuracies.append(training_accuracy)
+                    self.validation_losses.append(validation_loss)
+                    self.validation_accuracies.append(validation_accuracy)
 
-                    if no_processed_val >= self._settings["models"]["ffn_bert"]["max_batches_per_epoch"]:
-                        break
+                    logger.info("\n\nEpoch: {}/{}\n".format(self._trained_epochs,
+                                                            self._settings["models"]["ffn_bert"]["epochs"]) +
+                                "Training Loss: {:.6f}\n".format(training_loss) +
+                                "Training Accuracy: {:.3f}\n".format(training_accuracy) +
+                                "Validation Loss: {:.6f}\n".format(validation_loss) +
+                                "Validation Accuracy: {:.3f}\n".format(validation_accuracy))
 
-                print(validation_accuracy / (self._settings["models"]["ffn_bert"]["batch_size"] * no_processed_val))
-
-                #training_loss /= (self._train_data.length *
-                #                  self._settings["models"]["ffn_bert"]["data_loader_workers"])
-                #training_accuracy /= (self._train_data.length *
-                #                      self._settings["models"]["ffn_bert"]["data_loader_workers"])
-                #validation_loss /= (self._val_data.length *
-                #                    self._settings["models"]["ffn_bert"]["data_loader_workers"])
-                #validation_accuracy /= (self._val_data.length *
-                #                        self._settings["models"]["ffn_bert"]["data_loader_workers"])
-
-                training_loss /= (no_processed_train * self._settings["models"]["ffn_bert"]["batch_size"])
-                training_accuracy /= (no_processed_train * self._settings["models"]["ffn_bert"]["batch_size"])
-                validation_loss /= (no_processed_val * self._settings["models"]["ffn_bert"]["batch_size"])
-                validation_accuracy /= (no_processed_val * self._settings["models"]["ffn_bert"]["batch_size"])
-
-                # Saving metrics
-                self.train_losses.append(training_loss)
-                self.train_accuracies.append(training_accuracy)
-                self.validation_losses.append(validation_loss)
-                self.validation_accuracies.append(validation_accuracy)
-
-                logger.info("\n\nEpoch: {}/{}\n".format(self._trained_epochs,
-                                                        self._settings["models"]["ffn_bert"]["epochs"]) +
-                            "Training Loss: {:.6f}\n".format(training_loss) +
-                            "Training Accuracy: {:.3f}\n".format(training_accuracy) +
-                            "Validation Loss: {:.6f}\n".format(validation_loss) +
-                            "Validation Accuracy: {:.3f}\n".format(validation_accuracy))
-
-                self._model.train()
+                    self._model.train()
 
         logger.info("Training completed.")
 
@@ -241,9 +235,6 @@ class FfnBertModelInteractor:
             os.mkdir("checkpoints")
         except FileExistsError:
             logger.info("Checkpoint folder (checkpoints) already exists.")
-        else:
-            logger.critical("Checkpoint folder does not exist nor can be created. Abort saving.")
-            return
 
         time = datetime.now()
         model_filename = "checkpoints/{}-{}-{}_{}-{}_{}.pth"\
@@ -265,7 +256,7 @@ class FfnBertModelInteractor:
 
         checkpoint = torch.load(filepath)
 
-        interactor = FfnWord2VecModelInteractor(checkpoint["settings"], checkpoint["info"], load_embeddings=False)
+        interactor = FfnBertModelInteractor(checkpoint["settings"], checkpoint["info"])
 
         interactor._model.load_state_dict(checkpoint['state_dict'])
         interactor._trained_epochs = checkpoint["trained_epochs"]

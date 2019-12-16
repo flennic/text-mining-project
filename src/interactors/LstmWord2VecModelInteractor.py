@@ -122,8 +122,6 @@ class LstmWord2VecModelInteractor:
         processing. Losses and accuracies are saved within the object.
         """
 
-        no_batch = 0
-
         logger.info("Beginning training of model. (LSTM, Word2Vec)")
 
         self._optimizer = torch.optim.Adam(self._model.parameters(),
@@ -134,10 +132,11 @@ class LstmWord2VecModelInteractor:
 
             training_loss = 0
             training_accuracy = 0
+            processed_batches = 0
 
             for x, y in self._dataloader_train:
 
-                no_batch += 1
+                processed_batches += 1
 
                 # Initialize hidden states in each epoch
                 self._model.init_hidden(x.shape[0])
@@ -160,12 +159,25 @@ class LstmWord2VecModelInteractor:
                 training_loss += loss.item()
                 training_accuracy += torch.sum(torch.exp(output).topk(1)[1].view(-1) == y).item()
 
-                #if no_batch % 100 == 0:
-                #    print("Loss {}".format(loss.item()))
-                #    print("Accuracy: {}".format(torch.sum(torch.exp(output).topk(1)[1].view(-1) == y).item() / self._settings["models"]["ffn_w2v"]["batch_size"] /
-                #                                self._settings["models"]["lstm_w2v"]["data_loader_workers"]))
+                # Print metrics at each 1/info_density step
+                info_density = 20
+                batch_size = self._settings["models"]["lstm_w2v"]["batch_size"]
+                epochs = self._settings["models"]["lstm_w2v"]["epochs"]
+                data_loaders = self._settings["models"]["lstm_w2v"]["data_loader_workers"]
+
+                if processed_batches % round(self._train_data.length / info_density / batch_size * data_loaders) == 0:
+                    time = datetime.now()
+                    logger.info("\n\nEpoch: {}/{} - {}%\n".format(self._trained_epochs, epochs, round(
+                        100 * processed_batches * batch_size / self._train_data.length / data_loaders, 1)) +
+                                "Training Loss: {:.6f}\n".format(training_loss / (processed_batches * batch_size)) +
+                                "Training Accuracy: {:.3f}\n".format(
+                                    training_accuracy / (processed_batches * batch_size)) +
+                                "Time: {}-{}-{} {}:{:02d}".format(time.year, time.month, time.day, time.hour,
+                                                                  time.minute))
 
             else:
+
+                logger.info("Evaluating on validation set.")
 
                 self._trained_epochs += 1
 
@@ -236,9 +248,6 @@ class LstmWord2VecModelInteractor:
             os.mkdir("checkpoints")
         except OSError:
             logger.info("Checkpoint folder (checkpoints) already exists.")
-        else:
-            logger.critical("Checkpoint folder does not exist nor can be created. Abort saving.")
-            return
 
         time = datetime.now()
         model_filename = "checkpoints/{}-{}-{}_{}-{}_{}.pth"\

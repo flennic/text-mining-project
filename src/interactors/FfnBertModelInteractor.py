@@ -6,7 +6,7 @@ import torch
 import logging
 
 from datetime import datetime
-from transformers import BertModel
+from transformers import DistilBertModel
 from models.FfnBert import FfnBert
 from torch.utils.data import DataLoader
 from datasets.AmazonReviewDatasetWord2Vec import AmazonReviewDatasetWord2Vec
@@ -68,7 +68,7 @@ class FfnBertModelInteractor:
         logger.info("Creating model.")
 
         # Loading Bert
-        self._bert_model = BertModel.from_pretrained('bert-base-uncased').cuda()
+        self._bert_model = DistilBertModel.from_pretrained('bert-base-uncased').cuda()
         self._bert_model = self._bert_model.to(settings["device"])
 
         # Creating network

@@ -177,7 +177,7 @@ def preprocess(settings):
     logger.info("Pre-processing completed.")
 
     return {
-        "embedded_vectors": __embedder.vectors,
+        "embedded_vectors": __embedder.vectors if "w2v" in settings["run_model"] else None,
         "processed_train_file": prep_train_path,
         "processed_val_file": prep_val_path,
         "processed_test_file": prep_test_path,

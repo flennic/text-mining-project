@@ -10,7 +10,7 @@
     "embeddings": 1000000,
     "categories": 5,
     "run_model": "ffn_bert",
-    "load_cached_model": true,
+    "load_cached_model": false,
 
     "models": {
         "ffn_w2v": {

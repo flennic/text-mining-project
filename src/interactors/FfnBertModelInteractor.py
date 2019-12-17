@@ -191,8 +191,11 @@ class FfnBertModelInteractor:
                                                                                   time.hour, time.minute))
 
                     # Save trailing accuracy
-                    self.trailing_training_accuracy[(self._trained_epochs + 1)][percentage] = ":.3f".format(
-                        training_loss / (processed_batches * batch_size))
+                    if (self._trained_epochs + 1) not in self.trailing_training_accuracy:
+                        self.trailing_training_accuracy[(self._trained_epochs + 1)] = {}
+
+                    self.trailing_training_accuracy[(self._trained_epochs + 1)][percentage] = training_accuracy / (
+                            processed_batches * batch_size)
 
             else:
 

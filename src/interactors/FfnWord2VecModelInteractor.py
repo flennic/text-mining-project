@@ -124,15 +124,15 @@ class FfnWord2VecModelInteractor:
         settings = json.dumps(settings)
         trailing_training_accuracies = json.dumps(self.trailing_training_accuracy)
 
-        return f"\n###################\n" +\
-               f"{model_type}\n" +\
-               f"Epochs: {epochs}\n" +\
+        return f"\n###################\n" + \
+               f"{model_type}\n" + \
+               f"Epochs: {epochs}\n" + \
                f"Validation Accuracies: {validation_accuracies}\n" + \
-               f"Test Accuracy: {test_accuracy}\n" +\
-               f"Model Parameters: {model_parameters}\n" +\
-               f"###################\n" +\
-               f"Settings: {settings}\n" +\
-               f"Trailing Training Accuracies: {trailing_training_accuracies}\n" +\
+               f"Test Accuracy: {test_accuracy}\n" + \
+               f"Model Parameters: {model_parameters}\n" + \
+               f"###################\n" + \
+               f"Settings: {settings}\n" + \
+               f"Trailing Training Accuracies: {trailing_training_accuracies}\n" + \
                f"###################\n"
 
     # noinspection PyArgumentList
@@ -205,8 +205,11 @@ class FfnWord2VecModelInteractor:
                                                                   time.minute))
 
                     # Save trailing accuracy
-                    self.trailing_training_accuracy[(self._trained_epochs + 1)][percentage] = ":.3f".format(
-                        training_loss / (processed_batches * batch_size))
+                    if (self._trained_epochs + 1) not in self.trailing_training_accuracy:
+                        self.trailing_training_accuracy[(self._trained_epochs + 1)] = {}
+
+                    self.trailing_training_accuracy[(self._trained_epochs + 1)][percentage] = training_accuracy / (
+                                processed_batches * batch_size)
 
             else:
 

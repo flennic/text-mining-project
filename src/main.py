@@ -39,7 +39,7 @@ settings = {
             "data_loader_workers": 4,
             "batch_size": 8192,
             "learning_rate": 0.0001,
-            "epochs": 20,
+            "epochs": 10,
             "embedding_size": 300,
             "dropout": 0.25,
             "hidden": 256
@@ -48,7 +48,7 @@ settings = {
             "data_loader_workers": 2,
             "batch_size": 1024,
             "learning_rate": 0.0001,
-            "epochs": 20,
+            "epochs": 10,
             "embedding_size": 300,
             "dropout": 0.25,
             "lstm_layers": 2,

@@ -30,7 +30,7 @@ settings = {
     "padding": 200,
     "embeddings": 1_000_000,
     "categories": 5,
-    "run_model": "lstm_w2v",
+    "run_model": "ffn_w2v",
     "load_cached_model": False,
 
     # Models
@@ -38,18 +38,18 @@ settings = {
         "ffn_w2v": {
             "data_loader_workers": 4,
             "batch_size": 8192,
-            "learning_rate": 0.05,
-            "epochs": 1,
-            "embedding_size": 300,  # Fixed for Word2Vec, so do not change
+            "learning_rate": 0.0001,
+            "epochs": 2,
+            "embedding_size": 300,
             "dropout": 0.25,
             "hidden": 256
         },
         "lstm_w2v": {
             "data_loader_workers": 2,
             "batch_size": 1024,
-            "learning_rate": 0.002,
-            "epochs": 2,
-            "embedding_size": 300,  # Fixed for Word2Vec, so do not change
+            "learning_rate": 0.0001,
+            "epochs": 20,
+            "embedding_size": 300,
             "dropout": 0.25,
             "lstm_layers": 2,
             "lstm_hidden": 128,
@@ -59,19 +59,19 @@ settings = {
         "ffn_bert": {
             "data_loader_workers": 1,
             "batch_size": 256,
-            "learning_rate": 0.5,
-            "epochs": 8,
-            "embedding_size": 768,  # Fixed for Bert, so do not change
+            "learning_rate": 0.00005,
+            "epochs": 2,
+            "embedding_size": 768,
             "dropout": 0.25,
             "hidden": 256,
-            "max_batches_per_epoch": 16
+            "max_batches_per_epoch": 64
         },
         "lstm_bert": {
             "data_loader_workers": 1,
             "batch_size": 256,
-            "learning_rate": 0.002,
-            "epochs": 2,
-            "embedding_size": 769,  # Fixed for Bert, so do not change
+            "learning_rate": 0.00005,
+            "epochs": 1,
+            "embedding_size": 768,
             "dropout": 0.25,
             "lstm_layers": 2,
             "lstm_hidden": 128,
@@ -142,15 +142,17 @@ else:
     logger.critical(message)
     raise ValueError(message)
 
-
-#model._settings["models"]["lstm_w2v"]["epochs"] = settings["models"]["lstm_w2v"]["epochs"]
+# noinspection PyTypeChecker
+model._settings["models"]["lstm_w2v"]["epochs"] = settings["models"]["lstm_w2v"]["epochs"]
 
 # Training
 model.train()
 
-# Saving
-model.save()
+# Training automatically saves after each epoch.
 
 # Testing
+model.evaluate()
 
+# Print information
+print(model)
 

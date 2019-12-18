@@ -209,7 +209,7 @@ class FfnWord2VecModelInteractor:
                         self.trailing_training_accuracy[(self._trained_epochs + 1)] = {}
 
                     self.trailing_training_accuracy[(self._trained_epochs + 1)][percentage] = training_accuracy / (
-                                processed_batches * batch_size)
+                            processed_batches * batch_size)
 
             else:
 
@@ -300,7 +300,8 @@ class FfnWord2VecModelInteractor:
                                                 self._settings["models"]["ffn_w2v"]["epochs"]) +
                     "Test Loss: {:.6f}\n".format(test_loss) +
                     "Test Accuracy: {:.3f}\n".format(test_accuracy) +
-                    "Time: {}-{}-{} {}:{:02d}".format(time.year, time.month, time.day, time.hour, time.minute))
+                    "Time: {:04d}-{:02d}-{:02d} {:02d}:{:02d}".format(time.year, time.month, time.day, time.hour,
+                                                                  time.minute))
 
         self._model.train()
 
@@ -329,7 +330,7 @@ class FfnWord2VecModelInteractor:
             logger.info("Checkpoint folder (checkpoints) already exists.")
 
         time = datetime.now()
-        model_filename = "checkpoints/{}-{}-{}_{}-{}_{}.pth" \
+        model_filename = "checkpoints/{}-{:02d}-{:02d}_{:02d}-{:02d}_{}.pth" \
             .format(time.year, time.month, time.day, time.hour, time.minute, self.__class__.__name__)
 
         torch.save(checkpoint, model_filename)

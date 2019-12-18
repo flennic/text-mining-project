@@ -107,15 +107,15 @@ class FfnBertModelInteractor:
         settings = json.dumps(settings)
         trailing_training_accuracies = json.dumps(self.trailing_training_accuracy)
 
-        return f"\n###################\n" +\
-               f"{model_type}\n" +\
-               f"Epochs: {epochs}\n" +\
+        return f"\n###################\n" + \
+               f"{model_type}\n" + \
+               f"Epochs: {epochs}\n" + \
                f"Validation Accuracies: {validation_accuracies}\n" + \
-               f"Test Accuracy: {test_accuracy}\n" +\
-               f"Model Parameters: {model_parameters}\n" +\
-               f"###################\n" +\
-               f"Settings: {settings}\n" +\
-               f"Trailing Training Accuracies: {trailing_training_accuracies}\n" +\
+               f"Test Accuracy: {test_accuracy}\n" + \
+               f"Model Parameters: {model_parameters}\n" + \
+               f"###################\n" + \
+               f"Settings: {settings}\n" + \
+               f"Trailing Training Accuracies: {trailing_training_accuracies}\n" + \
                f"###################\n"
 
     # noinspection PyArgumentList
@@ -291,7 +291,8 @@ class FfnBertModelInteractor:
                                                 self._settings["models"]["ffn_bert"]["epochs"]) +
                     "Test Loss: {:.6f}\n".format(test_loss) +
                     "Test Accuracy: {:.3f}\n".format(test_accuracy) +
-                    "Time: {:04d}-{:02d}-{:02d} {:02d}:{:02d}".format(time.year, time.month, time.day, time.hour, time.minute))
+                    "Time: {:04d}-{:02d}-{:02d} {:02d}:{:02d}".format(time.year, time.month, time.day, time.hour,
+                                                                      time.minute))
 
         self._model.train()
 
@@ -320,7 +321,7 @@ class FfnBertModelInteractor:
             logger.info("Checkpoint folder (checkpoints) already exists.")
 
         time = datetime.now()
-        model_filename = "checkpoints/{}-{}-{}_{}-{}_{}.pth" \
+        model_filename = "checkpoints/{}-{:02d}-{:02d}_{:02d}-{:02d}_{}.pth" \
             .format(time.year, time.month, time.day, time.hour, time.minute, self.__class__.__name__)
 
         torch.save(checkpoint, model_filename)

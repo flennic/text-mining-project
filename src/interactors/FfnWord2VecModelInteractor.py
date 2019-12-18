@@ -282,10 +282,10 @@ class FfnWord2VecModelInteractor:
                 x = x.to(self._settings["device"])
                 y = y.to(self._settings["device"])
 
-                output_validation = self._model(x)
-                loss_val = self._criterion(output_validation, y)
+                output_test = self._model(x)
+                loss_val = self._criterion(output_test, y)
                 test_loss += loss_val.item()
-                test_accuracy += torch.sum(torch.exp(output_validation).topk(1, dim=1)[1].view(-1) == y).item()
+                test_accuracy += torch.sum(torch.exp(output_test).topk(1, dim=1)[1].view(-1) == y).item()
 
         test_loss /= (self._test_data.length * self._settings["models"]["ffn_w2v"]["data_loader_workers"])
         test_accuracy /= (self._test_data.length * self._settings["models"]["ffn_w2v"]["data_loader_workers"])
@@ -301,7 +301,7 @@ class FfnWord2VecModelInteractor:
                     "Test Loss: {:.6f}\n".format(test_loss) +
                     "Test Accuracy: {:.3f}\n".format(test_accuracy) +
                     "Time: {:04d}-{:02d}-{:02d} {:02d}:{:02d}".format(time.year, time.month, time.day, time.hour,
-                                                                  time.minute))
+                                                                      time.minute))
 
         self._model.train()
 

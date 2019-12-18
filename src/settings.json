@@ -2,14 +2,14 @@
     "orig_train_path": "data/original/train.csv",
     "orig_test_path": "data/original/test.csv",
     "processed_data_folder": "data/processed/",
-    "cached_model_path": "checkpoints/2019-12-15_23-25_FfnBertModelInteractor.pth",
+    "cached_model_path": "checkpoints/2019-12-17_15-40_LstmWord2VecModelInteractor.pth",
 
     "word2vec_path": "data/embeddings/GoogleNews-vectors-negative300.bin",
     "splits": [0.85, 0.1, 0.05],
     "padding": 200,
     "embeddings": 1000000,
     "categories": 5,
-    "run_model": "ffn_w2v",
+    "run_model": "ffn_bert",
     "load_cached_model": false,
 
     "models": {
@@ -17,7 +17,7 @@
             "data_loader_workers": 4,
             "batch_size": 8192,
             "learning_rate": 0.0001,
-            "epochs": 10,
+            "epochs": 20,
             "embedding_size": 300,
             "dropout": 0.25,
             "hidden": 256
@@ -25,8 +25,8 @@
         "lstm_w2v": {
             "data_loader_workers": 2,
             "batch_size": 1024,
-            "learning_rate": 0.0001,
-            "epochs": 10,
+            "learning_rate": 0.00005,
+            "epochs": 20,
             "embedding_size": 300,
             "dropout": 0.25,
             "lstm_layers": 2,
@@ -37,7 +37,7 @@
         "ffn_bert": {
             "data_loader_workers": 1,
             "batch_size": 256,
-            "learning_rate": 0.00005,
+            "learning_rate": 0.0001,
             "epochs": 2,
             "embedding_size": 768,
             "dropout": 0.25,

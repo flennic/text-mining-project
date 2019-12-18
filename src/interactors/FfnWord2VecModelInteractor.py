@@ -318,6 +318,9 @@ class FfnWord2VecModelInteractor:
                       "train_accuracies": self.train_accuracies,
                       "validation_losses": self.validation_losses,
                       "validation_accuracies": self.validation_accuracies,
+                      "test_loss": self.test_loss,
+                      "test_accuracy": self.test_accuracy,
+                      "trailing_training_accuracies": self.trailing_training_accuracy,
                       "state_dict": self._model.state_dict()}
 
         try:
@@ -353,6 +356,9 @@ class FfnWord2VecModelInteractor:
         interactor.train_accuracies = checkpoint["train_accuracies"]
         interactor.validation_losses = checkpoint["validation_losses"]
         interactor.validation_accuracies = checkpoint["validation_accuracies"]
+        interactor.test_loss = checkpoint["test_loss"]
+        interactor.test_accuracy = checkpoint["test_accuracy"]
+        interactor.trailing_training_accuracy = checkpoint["trailing_training_accuracies"]
 
         logger.info("Model successfully loaded from: {}".format(filepath))
 

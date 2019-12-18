@@ -7,7 +7,7 @@ read -p "Press [Enter] to continue."
 printf "\n\nStarting with creating folders.\n\n"
 
 mkdir data
-mkdir data/{embeddings,original,preprocessed}
+mkdir data/{embeddings,original,processed}
 
 printf "\nDownloading dataset. Around 614MB.\n"
 

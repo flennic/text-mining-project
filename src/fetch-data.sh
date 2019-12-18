@@ -15,7 +15,7 @@ wget https://nextcloud.pfundstein.org/s/Akj6Lam8LyAzjJz/download -O data/origina
 
 printf "\nExtracting files and doing some file shifting.\n"
 
-tar -zxvf amazon_review_full_csv.tar.gz -C data/original
+tar -zxvf data/original/amazon_review_full_csv.tar.gz -C data/original
 
 mv data/original/amazon_review_full_csv/* data/original
 rm -rf data/original/amazon_review_full_csv

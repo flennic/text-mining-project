@@ -289,8 +289,8 @@ class LstmWord2VecModelInteractor:
                 y = y.to(self._settings["device"])
 
                 output_test = self._model(x)
-                loss_val = self._criterion(output_test, y)
-                test_loss += loss_val.item()
+                loss_test = self._criterion(output_test, y)
+                test_loss += loss_test.item()
                 test_accuracy += torch.sum(torch.exp(output_test).topk(1, dim=1)[1].view(-1) == y).item()
 
         test_loss /= (self._test_data.length * self._settings["models"]["lstm_w2v"]["data_loader_workers"])
@@ -356,6 +356,8 @@ class LstmWord2VecModelInteractor:
         logger.info("Start loading model.")
 
         checkpoint = torch.load(filepath)
+
+        checkpoint["settings"]["device"] = torch.device("cpu")
 
         interactor = LstmWord2VecModelInteractor(checkpoint["settings"], checkpoint["info"], load_embeddings=False)
 

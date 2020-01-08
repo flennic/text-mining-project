@@ -9,12 +9,12 @@ import logging
 import json
 import numpy as np
 
-
-# Default settings. Will be overwritten by parameters set in the configuration file.
 from interactors.FfnBertModelInteractor import FfnBertModelInteractor
 from interactors.FfnWord2VecModelInteractor import FfnWord2VecModelInteractor
 from interactors.LstmWord2VecModelInteractor import LstmWord2VecModelInteractor
 from interactors.LstmBertModelInteractor import LstmBertModelInteractor
+
+# Default settings. Will be overwritten by parameters set in the configuration file.
 
 settings = {
     # Data Processing
@@ -81,7 +81,7 @@ settings = {
     },
 
     # General Parameters
-    "device": torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+    "device": torch.device("cpu"),
 
     # Miscellaneous
     "seed": 42,

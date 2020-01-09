@@ -4,6 +4,7 @@
 
 % Packages
 \usepackage[backend=biber,style=authoryear-icomp,sorting=ynt]{biblatex}
+%\usepackage[backend=biber,sorting=ynt]{biblatex}
 \usepackage{hyperref}
 \usepackage{graphicx}
 %\usepackage[margin=1.25in]{geometry}
@@ -30,7 +31,8 @@
 \definecolor{custom_two}{HTML}{eb6841}
 \definecolor{custom_three}{HTML}{cc2a36}
 \definecolor{custom_four}{HTML}{4f372d}
-\definecolor{custom_five}{HTML}{edc951}
+\definecolor{custom_five}{HTML}{183059}
+\definecolor{custom_six}{HTML}{edc951}
 
 % Command needed for having a caption and source for pictures
 \newcommand*{\captionsource}[2]{%
@@ -91,7 +93,9 @@
 \addbibresource{literature.bib}
 
 \title{Impact of Contextualised and Non-Contextualised Word Embeddings on Classification Performance}
-\author{Maximilian Pfundstein}
+%\subtitle{A closer look at the expenses}
+\subject{Text Mining (732A92)}
+\author{Maximilian Pfundstein (maxpf364)}
 \date{\today}
 
 \begin{document}
@@ -99,7 +103,7 @@
 \maketitle
 \begin{abstract}
 
-Abstract Text.
+This project investigates the capabilities of contextualised word embeddings provided by bidirectional transformer encoders with DistilBERT as a representatives compared to non-contextualised word embeddings with Word2Vec as a representative. As DistilBERT is based on encoders only, a feed-forward network (FFN) and an Long Short-Term Memory (LSTM) are used for the downstream task of text classification. The dataset used are Amazon reviews ranging from one to five stars and all four combinations of word embeddings and classifiers are being tested.The accuracies on the test data set and the models corresponding training times are: The FFN with Word2Vec achieved an accuracy of $43.10$ percent, training for $2.3$ hours; the FFN with DistilBERT achieved an accuracy of $49.98$ percent, training for $11.65$ hours; the LSTM with Word2Vec achieved an accuracy of $50.49$ percent, training for $6.35$ hours; the LSTM with DistilBERT achieved an accuracy of $56.43$ percent training for $12.1$ hours. Concluding, contextualised word embeddings help for the task of text classification at the cost of a higher computational demand.
 
 \end{abstract}
 
@@ -111,9 +115,13 @@ Abstract Text.
 
 \vspace*{\fill}
 
-\textbf{Scope}
+\textbf{Preamble}
 
-Scope Text.
+This project was carried out as a part of the course Text Mining (732A92) which is part of the Statistics and Machine Learning Master programme at Linköpings University in 2019/2020. The course web page can be found at \url{https://www.ida.liu.se/~732A92/}. \\
+
+This report, the source code and all conducted analysis can be found on GitHub at \url{https://github.com/flennic/text-mining-project/}. \\
+
+The total amount of words is around $3787$.
 
 \vspace*{\fill}
 
@@ -121,7 +129,7 @@ Scope Text.
 
 \section{Introduction}
 
-\textbf{518 words}
+\textbf{478 words}
 
 \textit{Introduce the task or research question that you have addressed in your project. What were you trying to do? Why did you choose this project?}
 
@@ -129,7 +137,7 @@ Within the last years, significant progress based on deep learning has been made
 
 \begin{figure}[hbt]
 	\center
-	\includegraphics[width=1.0\textwidth]{img/kingmanwomanqueen}
+	\includegraphics[width=0.9\textwidth]{img/kingmanwomanqueen}
 	\captionsource{Subtracting the vectors man from king and adding woman almost results in queen.}{https://jalammar.github.io/illustrated-word2vec/}
 	\label{fig:kingmanwomanqueen}
 \end{figure}
@@ -148,7 +156,7 @@ As the computational demand, even for a pre-trained BERT model, are too demandin
 
 \section{Theory}
 
-\textbf{1620 words}
+\textbf{1599 words}
 
 \textit{Present relevant theoretical background, and in particular the models that you have used. Where appropriate, use mathematical formulas.}
 
@@ -164,8 +172,6 @@ For investigating the influence of non-contextualised and contextualised word em
 \subsection{Models}
 
 \subsubsection{Feed-Forward Network}
-
-\textbf{358 words}
 
 \begin{figure}[hbt]
 	\center
@@ -301,7 +307,7 @@ As even the smallest BERT model has high computational demands, \textit{DistilBE
 
 \section{Data}
 
-\textbf{232 words}
+\textbf{334 words}
 
 \subsection{Presentation}
 
@@ -341,8 +347,6 @@ The class distribution can be seen in figure \ref{fig:class_distribution} and th
 
 \subsection{Preprocessing}
 
-\textbf{162 words}
-
 The original training and test data sets are read, concatenated and shuffled. Then the column for the \textit{title} of the review is being dropped and all labels are shifted by $-1$ so that the labels are $0, 1, 2, 3, 4$. Next, the data is split into 85 percent training, 10 percent validation and 5 percent test data. For the following sentences a padding of 200 has been used\footnote{Normally only the training data should be used for deciding the padding. Due to time constrains this wasn't changed. As 85 percent randomly chosen data is used for training, the result is likely to not be that much different.}. This lies way above the 99th percentile of $177$ words as it accounts for that during the tokenisation the sentences become longer due to punctuation and as well as some words becoming separated.
 
 The padding is applied after tokenisation. The tokeniser used for both, Word2Vec and BERT, is the DistilBERT tokeniser provided by the HuggingFace library\footnote{https://huggingface.co/transformers/model\_doc/distilbert.html\#distilberttokenizer}. For Word2Vec, only the $1\,000\,000$ most common embeddings are taken due to computational constraints. Therefore all other word are considered unknown.
@@ -351,7 +355,7 @@ After preprocessing, the three data sets are saved as \texttt{.csv} files where 
 
 \section{Method}
 
-\textbf{356 words}
+\textbf{357 words}
 
 \textit{Explain how you carried out your study. Aim to be detailed enough for others to reproduce your results.}
 
@@ -375,17 +379,11 @@ As the data set is balanced, accuracy is used as it provides a single value to e
 
 \section{Results}
 
-\textbf{65 words}
+\textbf{395 words}
 
 \textit{Present your results in an objective way. Use tables and charts, but do not forget to also include a summary in text form. Do not interpret your results.}
 
-\begin{itemize}
-    \item Shows achieved accuracy's on train and test
-    \item Also show learning curves
-    \item Maybe a word on training times
-\end{itemize}
-
-All four model combinations and their achieved accuracies can be seen in figure \ref{tab:results}. The accuracies for training have dropout enabled. Figure \ref{fig:ffn_w2v_results} shows the accuracies for the FFN with Word2Vec embeddings, figure \ref{fig:ffn_bert_results} shows the accuracies for the FFN with DistilBERT, figure \ref{fig:lstm_w2v_results} shows the accuracies for the LSTM with Word2Vec embeddings and figure \ref{fig:lstm_bert_results} shows the accuracies for the LSTm with DestilBERT embeddings. 
+All four model combinations and their achieved accuracies can be seen in table \ref{tab:results}. The accuracies for training have dropout enabled\footnote{Enabling another prediction without dropout would have been too time consuming for this project.} and are trailing accuracies. This means that the accuracy will jump between the epochs, as the model is usually less accurate during the beginning of an epoch and the trailing training accuracy is always the average until the current batch. Figure \ref{fig:ffn_w2v_results} shows the accuracies for the FFN with Word2Vec embeddings for training, validation and test for different epochs, figure \ref{fig:ffn_bert_results} shows the accuracies for the FFN with DistilBERT, figure \ref{fig:lstm_w2v_results} shows the accuracies for the LSTM with Word2Vec embeddings and figure \ref{fig:lstm_bert_results} shows the accuracies for the LSTM with DestilBERT embeddings. The lowest baseline accuracy is at $20.00$ percent which could be achieved by simply predicting one class at all times.
 
 \begin{table}[h]
     \centering
@@ -400,6 +398,8 @@ All four model combinations and their achieved accuracies can be seen in figure 
     \label{tab:results}
 \end{table}
 
+It can be seen that the FFN with Word2Vec embeddings has the lowest testing score with a test accuracy of $43.10$ percent. The FFN with using DistilBERT embeddings achieves a higher test accuracy of $49.98$ percent, closely followed by the LSTM using Word2Vec embeddings with a test accuracy of $50.49$ percent. The highest accuracy is achieved by the LSTM in combination with DistilBERT embedding and and is $56.43$ for the test data set. For all model combinations except the FFN using Word2Vec embeddings, the test accuracy is slightly higher compared to validation, which seems a bit odd, but this behaviour can be seen for all these other models. For the FFN using Word2Vec the test accuracy is way lower than the training or validation accuracy\footnote{Due to these results the source code has been investigated but no issues have been found. Therefore these results are treated as valid.}.
+
 \begin{figure}[hbt]
 	\center
 	\begin{tikzpicture}
@@ -408,6 +408,7 @@ All four model combinations and their achieved accuracies can be seen in figure 
             y axis line style = { opacity = 0 },
             axis x line       = none,
             tickwidth         = 0pt,
+            xmin              = 0,
             enlarge y limits  = 0.25,
             enlarge x limits  = 0.02,
             symbolic y coords = {ffnw2v,ffnbert,lstmw2v,lstmbert},
@@ -416,7 +417,7 @@ All four model combinations and their achieved accuracies can be seen in figure 
             legend style={at={(1.335,1)},anchor=north east},
             every axis plot/.append style={fill,draw=none,no markers}
           ]
-          \addplot[color=custom_four] coordinates {(2.3,ffnw2v)
+          \addplot[color=custom_five] coordinates {(2.3,ffnw2v)
                                 (11.65,ffnbert)
                                 (6.35,lstmw2v)
                                 (12.1,lstmbert)};
@@ -426,6 +427,7 @@ All four model combinations and their achieved accuracies can be seen in figure 
 	\label{fig:training_times}
 \end{figure}
 
+Figure \ref{fig:training_times} shows the training times for the model combinations. The models using non-contextualised word embeddings (Word2Vec) are trained for 30 epochs and the models using contextualised word embeddings (DistilBERT) are trained for 3 epochs. Both models using DilstilBERT word embeddings have the highest training times with $12.1$ hours for the LSTM and and $11.65$ hours for the FFN. Around have of the time is needed for the LSTM with Word2Vec word embeddings and a training time around $6.35$ hours. The lowest training time is achieved by the FFN with Word2Vec embeddings and takes just $2.3$ hours.
 
 % ffn_w2v
 \begin{figure}[hbt]
@@ -2607,7 +2609,6 @@ All four model combinations and their achieved accuracies can be seen in figure 
             (2.73, 0.5599301335500283)
             (2.735, 0.5599722974679991)
             (2.74, 0.5599685827199732)
-            (2.745, 0.5599787639842712)
             (2.75, 0.5600193228077897)
             (2.755, 0.5600717213114754)
             (2.76, 0.5600869544566279)
@@ -2666,31 +2667,30 @@ All four model combinations and their achieved accuracies can be seen in figure 
 	\label{fig:lstm_bert_results}
 \end{figure}
 
-
-
 \section{Discussion}
 
-Analyse your results and discuss the possibilities and limitations of your technical approach. Compare your study to related work.
+\textbf{424 words}
 
-\begin{itemize}
-    \item Say the obvious for this problem set
-    \item Refer to BERTs classification Token
-    \item Limitations: There are a lot!
-    \item Compare to related work, also important (do research)
-\end{itemize}
+\textit{What do you make of it? Discuss your results and present your analysis.
+Relate your results to your task/question.}
 
+The results show that contextualised word embeddings provide a higher accuracy, with a difference of almost $7$ percent points for the FFN and almost $6$ percent for the LSTM. Apart from achieving a higher accuracy also less iterations though the training data set are necessary for not only achieving the same, but better results. This makes the trained model less prone to overfit the data. Each training sample, in this case, is seen $40$ times compared to the FFN using Word2Vec word embeddings and $20$ times compared to the LSTM using Word2Vec word embeddings compared to their non-contextualised counterparts. Note that for this factor not only the difference in epochs must be taken in, but also the amount of data loaders used. For example, when $2$ data loaders are used, the whole data set is seen twice during one epoch\footnote{This is due to lazy loading the data form disk as the whole data does not fit into memory.}. The overfit can be especially seen for the FFN using Word2Vec embeddings. Looking at figure \ref{fig:ffn_w2v_results} it can also be seen that the test accuracy becomes lower going from $20$ to $30$ training epochs.
+
+It can also be seen that using contextualised word embeddings the training times for the models are a lot higher, the biggest difference between the LSTM using DistilBERT embeddings and the FFN using Word2Vec embeddings with almost a factor of $6$. One interesting finding is that for the Word2Vec embeddings the LSTM increases the training time by a factor around $3$, whereas for the DistilBERT embeddings the difference is almost negligible. The reason for that could be a parallelisation during the training process, as the implementation used here utilised multiple data loaders. This could be taken as an advantage in the future, as parallelised hardware is easier scalable (see core counts for CPU and GPU with are basically made for parallel execution) than single thread performance. Another interesting finding is that, despite the fact that DistilBERT basically is a bidirectional encoder, still an LSTM is necessary to extract all the information from the contextualised embeddings. The FFN using the word embeddings from DistilBERT is way less accurate than the equivalent LSTM. Also note, that due to computational limitations, this is a rather simple LSTM with just two layers, a small hidden state and foremost, it it just unidirectional. Therefore one presumption is that a larger BiLSTM might achieve even higher accuracies.
+
+For the results acquired in this project, the only hyperparameter search that was conducted, was manual tweaking the learning rate.
 
 \section{Conclusion}
 
-Based on your results and their analysis, what new knowledge do you take away from your project?
+\textbf{190 words}
 
-\begin{itemize}
-    \item BERT helps, for the high price of computational power, even if left static
-    \item DistilBERT is quite good if the last percentages do no matter that much
-    \item DeepLearning becomes even more resource hungry
-    \item GPT2
-\end{itemize}
+\textit{Based on your results and their analysis, what new knowledge do you take away from your project?}
 
+Contextualised word embeddings are indeed more powerful than their non-contextualised counterparts. The price for that is a high computational demand. Some of the additional demanded computational power is compensated by parallelisation, still it's high. Especially considering that DistilBERT and not BERT is being used. DistilBERT is not only 60 percent faster (\cite{sanh2019distilbert}, p. 5), but also 40 percent smaller, so the batch size can be increased which makes it even faster compared to BERT.
+
+With deep learning already requiring a lot of computational power, these new models taking it to the next level, which is indeed a problem. The problem is not only the price for the required hard, but also environmental issues. However, these new transformers indeed capture more information and might push the domain of NLP forward. It can also be seen that, at least to some degree, the research society is aware of this problem and trying to reduce computation demands. Here DistilBERT is used, Google also released ALBERT (\cite{2019albert}) which is a lighter version of BERT.
+
+Still the question remains, if throwing hardware at our problems will be a long-term solution for the domain of NLP.
 
 \clearpage
 
@@ -2699,7 +2699,6 @@ Based on your results and their analysis, what new knowledge do you take away fr
 \clearpage
 
 \section{Appendix}
-
 
 \subsection{Model Settings}
 \label{sec:model_settings}

@@ -30,7 +30,7 @@ I strongly suggest having at least 20GB of free disk space, 16GB of memory and a
 
 The preprocessing will take some time, so be patient. Leave the `cache` parameter set to true, so that you only have to do it once.
 
-You should install CUDA for make the GPU work [CUDA](https://developer.nvidia.com/cuda-downloads).
+You should install [CUDA](https://developer.nvidia.com/cuda-downloads) to make the GPU work.
 
 For the following I suggest setting up a new anaconda environment. You will need the following libraries:
 

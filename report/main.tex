@@ -121,7 +121,7 @@ This project was carried out as a part of the course Text Mining (732A92) which 
 
 This report, the source code and all conducted analysis can be found on GitHub at \url{https://github.com/flennic/text-mining-project/}. \\
 
-The total amount of words is around $3787$.
+The total amount of words is around $3842$.
 
 \vspace*{\fill}
 
@@ -129,11 +129,11 @@ The total amount of words is around $3787$.
 
 \section{Introduction}
 
-\textbf{478 words}
+\textbf{493 words}
 
 \textit{Introduce the task or research question that you have addressed in your project. What were you trying to do? Why did you choose this project?}
 
-Within the last years, significant progress based on deep learning has been made in the field of Natural Language Processing (NLP) (\cite{young2017recent}). Before that, primarily statistical methods have been used (\cite{young2017recent}, p. 2). As these methods were prone to the \textit{curse of dimensionality} (\cite{young2017recent}, p. 2), the next step that followed was to represent words in such a way, that familiar words were assigned a so called \textit{word embedding} such that related words appear in a familiar context.
+Within the last years, significant progress based on deep learning has been made in the field of Natural Language Processing (NLP) (\cite{young2017recent}). Prior to that, foremost statistical methods have been used (\cite{young2017recent}, p. 2). As these methods were prone to the \textit{curse of dimensionality} (\cite{young2017recent}, p. 2), the next step that followed was to represent words in such a way, that familiar words were assigned a so called \textit{word embedding} such that related words appear in a familiar context.
 
 \begin{figure}[hbt]
 	\center
@@ -142,25 +142,25 @@ Within the last years, significant progress based on deep learning has been made
 	\label{fig:kingmanwomanqueen}
 \end{figure}
 
-Two known representatives for word embeddings are \textit{Word2Vec} (\cite{mikolov2013efficient}; \cite{mikolov2013distributed}) and GloVe (\cite{pennington2014glove}). Word2Vec is either trained based on a \textit{continuous bag of words} model (\cite{mikolov2013efficient}, p. 4), predicting a missing word within a sequence, or based on a \textit{skip-gram} model  (\cite{mikolov2013distributed}, p. 2), using a sliding window over a sequence of words. Both approaches for Word2Vec are based on neural networks for prediction. GloVe embeddings by contrast are based on matrix factorization techniques that create embeddings in such a way that the dot product between two embeddings equals the log of their occurrences within a given context (\cite{pennington2014glove}, p. 2; \cite{pennington2014glove}, equation 7). An example of embeddings can be seen in figure \ref{fig:kingmanwomanqueen}.
+Two known representatives for word embeddings are \textit{Word2Vec} (\cite{mikolov2013efficient}; \cite{mikolov2013distributed}) and GloVe (\cite{pennington2014glove}). Word2Vec is either trained based on a \textit{continuous bag of words} model (\cite{mikolov2013efficient}, p. 4), predicting a missing word within a sequence, or based on a \textit{skip-gram} model  (\cite{mikolov2013distributed}, p. 2), using a sliding window over a sequence of words. Both approaches for Word2Vec are based on neural networks for learning. GloVe embeddings in contrast are based on matrix factorisation techniques which create embeddings in such a way that the dot product between two embeddings equals the log of their occurrences within a given context (\cite{pennington2014glove}, p. 2; \cite{pennington2014glove}, equation 7). An example of embeddings can be seen in figure \ref{fig:kingmanwomanqueen}, illustrating the embedded information and it's similarity.
 
-These embeddings will have one fixed embedding for each (known) word, independently from their context. We will therefore call these \textit{non-contextualised embeddings}. This implies that for example a word with a meaning dependent on the context will not always be adequately embedded (\cite{young2017recent}, p. 5). Therefore the next step was to use embeddings which are aware of their context. One of these models is Embedding from Language Model (ELMo) (\cite{peters2018deep}), which utilises a bidirectional language model and thereof being aware of words preceding and following the word to embed. We will call these embeddings \textit{contextualised embeddings}.
+These embeddings will have one fixed embedding for each (known) word, independently from their context. We will therefore call these \textit{non-contextualised embeddings}. This implies that for example a word with a meaning dependent on its context will not always be adequately embedded (\cite{young2017recent}, p. 5). Therefore the next step was to use embeddings which are aware of their context. One of these models is Embedding from Language Model (ELMo) (\cite{peters2018deep}), which utilises a bidirectional language model and thereof being aware of words preceding and following the word to embed. We will call these embeddings \textit{contextualised} embeddings.
 
-OpenAI\footnote{https://openai.com/} released their \textit{OpenAI Transformer} (\cite{Radford2018ImprovingLU}) which also creates contextualised embeddings and  provides a pre-trained model to work with. The OpenAI Transformer consists just of the decoder part of the originally released \textit{Transformer} (\cite{vaswani2017attention}). For downstream tasks such as classification a simple classifier, like a feed-forward network (FFN), can then be used. While transformers achieved remarkable results on previous tasks (\cite{Radford2018ImprovingLU}, p.8), they lost the ability being bi-directional, as ELMo was before.
+OpenAI\footnote{https://openai.com/} released their \textit{OpenAI Transformer} (\cite{Radford2018ImprovingLU}) which also creates contextualised embeddings and  provides a pre-trained model to work with. The OpenAI Transformer consists just of the decoder part of the originally released \textit{Transformer} (\cite{vaswani2017attention}). For downstream tasks such as classification, a simple classifier, like a feed-forward network (FFN), can then be used. While transformers achieved remarkable results on previous tasks (\cite{Radford2018ImprovingLU}, p.8), they lost the ability being bi-directional, as ELMo was before.
 
 Bidirectional Encoder Representations from Transformers (BERT), released by Google in May 2019, resolved this problem (\cite{devlin2018bert}), making transformers bidirectional again, using a technique called masking to prevent peeking at the solution.
 
-While all of these models achieve better results than simpler models, they all rely on deep learning and thereof require a lot of computational resources. This report will investigate how much these achievements over the past years can actually be used in a straight-forward task such as sentence classification.
+While all of these models achieve better results than simpler models, they all rely on deep learning and thereby require a lot of computational resources. This report will investigate how much these achievements over the past years can actually be used in a straight-forward task such as sentence classification, by comparing non-contextualised and contextualised word embeddings.
 
-As the computational demand, even for a pre-trained BERT model, are too demanding for the given resources\footnote{Mainly constrained by 16GiBs of memory and 8GiB of video memory.}, DistilBERT (\cite{sanh2019distilbert}) by \textit{Hugging Face}\footnote{https://huggingface.co/} is being used.
+As the computational demand, even for a pre-trained BERT model, is too demanding for the given resources\footnote{Mainly constrained by 16GiBs of memory and 8GiB of video memory.}, DistilBERT (\cite{sanh2019distilbert}) by \textit{Hugging Face}\footnote{https://huggingface.co/} is being used.
 
 \section{Theory}
 
-\textbf{1599 words}
+\textbf{1625 words}
 
 \textit{Present relevant theoretical background, and in particular the models that you have used. Where appropriate, use mathematical formulas.}
 
-For investigating the influence of non-contextualised and contextualised word embeddings, a simple FFN and an LSTM are being used. In addition to that, both will be trained once based on non-contextualised word embeddings using Word2Vec and once based on contextualised word embeddings from DistilBERT. For simplicity we will refer to the FNN and LSTM as models, to Word2Vec as non-contextualised and to (Distil)BERT as contextualised word embeddings interchangeably. Following from that, we will investigate the following four combinations:
+For investigating the influence of non-contextualised and contextualised word embeddings, a simple FFN and an LSTM are being used. Additionally, both will be trained once based on non-contextualised word embeddings using Word2Vec and once based on contextualised word embeddings from DistilBERT. For simplicity, we will refer to the FNN and LSTM as models, to Word2Vec as non-contextualised and to (Distil)BERT as contextualised word embeddings interchangeably. Following from that, we will investigate the following four combinations:
 
 \begin{itemize}
     \item FFN (Word2Vec)
@@ -180,19 +180,19 @@ For investigating the influence of non-contextualised and contextualised word em
 	\label{fig:ffn}
 \end{figure}
 
-A FFN consists of multiple layers where the information only flows in one direction. Usually the input is fed to a first layer, which is a linear combinations of the inputs and the weights of the first layer. $X$ is the input and $W_i$ are the weights of the $i$th layer including the bias. Then an activation function is applied to map the outback back to a specific range, usually the Sigmoid activation function or a rectified linear (ReLU) function:
+A FFN consists of multiple layers where the information only flows in one direction. The input is fed to the first layer, which is a linear combination of the inputs and the weights of the first layer. The input will be denoted by $X$ and the weights of the $i$th layer including the bias are denoted by $W_i$. Then, an activation function is applied to map the outback back to a specific range, usually the Sigmoid activation function or a rectified linear (ReLU) function:
 
 \begin{equation}
-    \hat{Y_i} = \sigma(X^T * W_i)
+    \hat{Y_i} = \sigma(X^T W_i)
 \end{equation}
 
-This is usually called a dense layer which are stacked and thereby build the model architecture. The intermediate layers are usually called \textit{hidden} layers as they cannot be seen directly from the outside. Figure \ref{fig:ffn} shows an illustrative FFN. Depending on the problem, the last activation layer might be skipped. Afterwards, an error function to optimise later on is being applied to the output. This whole process is called \textit{forward pass}. To update the weights, a \textit{backward pass} is being applied to update the weights. The error depends on the weights and can be written as:
+This combination is called a dense layer and multiple of those are being stacked and represent the model architecture. The intermediate layers are usually called \textit{hidden} layers as they cannot be directly seen from the outside. Figure \ref{fig:ffn} shows an illustrative FFN. Depending on the desired output, the last activation layer might be skipped. Finally, an error function is being applied to the output. This whole process is called \textit{forward pass}. To update the weights of the model, a \textit{backward pass} is done, which calculates the gradients, as the error depends on the weights. This can be written as:
 
 \begin{equation}
     \nabla E = \left(\frac{\delta E}{\delta W_n}, \frac{\delta E}{\delta W_{n-1}},\: ...\:, \frac{\delta E}{\delta W_1} \right)
 \end{equation}
 
-For updating one layer of weights, the partial derivative is being calculated. For the last layer, here denoted as $W_n$, the gradients and this the update would look like the following:
+For updating one layer of weights, the partial derivative is being determined. For the last layer, here denoted as $W_n$, the gradient  would look like the following, where $\alpha$ is the \textit{learning rate}:
 
 \begin{equation}
     \frac{\delta E}{\delta W_n} = \frac{\delta E}{\delta \hat{Y}} \frac{\delta \hat{Y}}{\delta A_n} \frac{\delta A_n}{\delta W_n}
@@ -204,7 +204,7 @@ $A_n$ is the intermediate value between the linear combination and the applied a
     W_n^{updated} = W_n - \alpha \odot \frac{\delta E}{\delta W_n}
 \end{equation}
 
-The remaining layers are updated accordingly, the chain rule just yields in longer equations. Deep neural networks are prone to the vanishing gradient problem (\cite{pascanu2012difficulty}).
+The remaining layers are updated accordingly, the chain rule just yields in longer equations. Deep neural networks are prone to the vanishing gradient problem (\cite{pascanu2012difficulty}), which can be an issue.
 
 \subsubsection{Long Short-Term Memory}
 
@@ -215,26 +215,26 @@ The remaining layers are updated accordingly, the chain rule just yields in long
 	\label{fig:lstm_overview}
 \end{figure}
 
- An LSTM belongs to the field of recurrent neural networks (RNNs) and handles long term relationships better than a classical RNN (\cite{10.1162/neco.1997.9.8.1735,}, abstract). As text can be seen as a sequence with long term dependencies, LSTMs are suitable for catching those long term dependencies. LSTMs, as well as RNNs, look at one element of the sequence (here a word) and in addition to the normal output vector the old cell state is passed on to the cell handling the second element of the sequence. Utilising this hidden state, information can be preserved and pass on. An unfolded LSTM can be seen in figure \ref{fig:lstm_overview}.
+An LSTM belongs to the field of recurrent neural networks (RNNs) and handles long term relationships better than a classical RNN (\cite{10.1162/neco.1997.9.8.1735,}, abstract). As text can be seen as a sequence with long term dependencies, LSTMs are suitable for catching those long term dependencies. LSTMs, as well as RNNs, look at one element of a sequence (in this context a word) and additionally to the normal output vector, the old cell state is passed on to the next cell handling the second element of the sequence. Utilising this hidden state, information can be preserved and passed on. An unfolded LSTM can be seen in figure \ref{fig:lstm_overview}.
  
- In each time step, an LSTM cell sees the Long Term Memory (LTM), denoted as $C_{t-1}$, and the Short Term Memory (STM), denoted as $h_{t-1}$, thus the output from the previous cell (previous time step). Additionally it sees the current element of the sequence, denoted $x_t$. It then produces an output $h_t$, the LTM $C_t$ and STM $h_t$ for the next cell.
+In each time step, an LSTM cell sees the Long Term Memory (LTM), denoted as $C_{t-1}$, and the Short Term Memory (STM), denoted as $h_{t-1}$, from the previous cell (previous time step). Additionally, it sees the current element of the sequence, denoted $x_t$. It then produces an output $h_t$, the LTM $C_t$ and the STM $h_t$ for the next cell.
  
- This process is enabled by an architecture consisting of four gates, the \textit{forget gate}, the \textit{learn gate}, the \textit{remember gate} and the \textit{use gate}.\footnote{Explanations based on the course "Intro to Deep Learning with PyTorch" on Udacity. Biases have been omitted, as they're included in the weights, variables have been partly renamed to fit the figure. Also https://colah.github.io/posts/2015-08-Understanding-LSTMs/ and the official paper (\cite{10.1162/neco.1997.9.8.1735}) have been used.}
+This process is enabled by an architecture consisting of four gates, the \textit{forget gate}, the \textit{learn gate}, the \textit{remember gate} and the \textit{use gate}.\footnote{Explanations based on the course "Intro to Deep Learning with PyTorch" on Udacity. Biases have been omitted, as they're included in the weights, variables have been partly renamed to fit the figure. Also https://colah.github.io/posts/2015-08-Understanding-LSTMs/ and the official paper (\cite{10.1162/neco.1997.9.8.1735}) have been used.}
  
- \paragraph{Learn Gate} The learn gate first takes the new element $x_t$ and combines it with the STM ($h_{t-1}$) using concatenation, then passing it though a \textit{tanh} activation function, after taking a linear combination with its weights $W_n$. This output is denoted as $N_t$. Next it is multiplied by an ignore factor $i_t$, making it ignore unimportant information. The ignore factor is the Sigmoid activation function applied to the linear combination between $W_i$ and the previously concatenated values. The output is given as $N_t i_t$ with:
+\paragraph{Learn Gate} The learn gate takes the new element $x_t$ and concatenates it with the STM ($h_{t-1}$). Then, after taking a linear combination with its weights $W_n$, it passed the results through a \textit{tanh} activation function. This value is denoted as $N_t$. Finally, it is multiplied by an ignore factor $i_t$, making it ignoring unimportant information. The ignore factor is the Sigmoid activation function applied to the linear combination between $W_i$ and the previously concatenated values. The output of the learn gate is thus given as $N_t i_t$ with:
+ 
+\begin{equation}
+    N_t = \text{tanh}(W_n(h_{t-1}, x_t)
+\end{equation}
+ 
+\begin{equation}
+    i_t = \sigma(W_i(h_{t-1}, x_t))
+\end{equation}
+ 
+\paragraph{Forget Gate} The forget gate looks at the previous LTM memory $C_{t-1}$ and decides which information is being kept and which is being thrown away. This information is encapsulated in a forget factor $f_t$. The forget factor is the linear combination of the weights $W_f$ multiplied by the concatenated element of the sequence $x_t$ and the previous STM $h_{t-1}$. Afterwards, the Sigmoid activation function is applied. Finally, the output of the forget gate is given as $C_{t-1}f_t$:
  
  \begin{equation}
-     N_t = \text{tanh}(W_n(h_{t-1}, x_t)
- \end{equation}
- 
- \begin{equation}
-     i_t = \sigma(W_i(h_{t-1}, x_t))
- \end{equation}
- 
- \paragraph{Forget Gate} The forget gate looks at the previous LTM memory $C_{t-1}$ and decides which information is kept and which to throw away. A forget factor $f_t$ is being calculated. Therefore the output of the forget gate is given as $C_{t-1}f_t$. The forget factor is the linear combination of the weights $W_f$ multiplied by the concatenated elements of the sequence $x_t$ and the previous STM $h_{t-1}$. Then the Sigmoid activation function is applied:
- 
-  \begin{equation}
-     f_t = \sigma(W_f(h_{t-1}, x_t))
+    f_t = \sigma(W_f(h_{t-1}, x_t))
  \end{equation}
  
 \paragraph{Remember Gate} The remember gate looks at the previous LTM $C_{t-1}$ and STM $h_{t-1}$ and then calculates the new LTM state $C_t$, utilising the previously calculated ignore and forget factors $f_t$ and $i_t$:
@@ -243,7 +243,7 @@ The remaining layers are updated accordingly, the chain rule just yields in long
     C_t = C_{t-1}f_t + N_t i_t
 \end{equation}
  
-\paragraph{Use Gate} The use gate first applies the \textit{tanh} activation function to the linear combination $W_u$ of the output of the forget gate ($C_{t-1}f_t$) to calculate $U_t$. It then calculates $V_t$ by taking the Sigmoid activation function of the linear combination of $W_v$ and the concatenation of STM $h_{t-1}$ and the current element of the sequence $x_t$. Then, the output of the use gate is defined as $U_t V_t$.
+\paragraph{Use Gate} The use gate first applies the \textit{tanh} activation function to the linear combination of the weights $W_u$ and the output of the forget gate ($C_{t-1}f_t$) to calculate $U_t$. It then calculates $V_t$ by taking the Sigmoid activation function of the linear combination of $W_v$ and the concatenation of STM $h_{t-1}$ and the current element of the sequence, $x_t$. Then, the output of the use gate is defined as $U_t V_t$.
 
 \begin{equation}
     U_t = \text{tanh}(W_u C_{t-1} f_t)
@@ -253,13 +253,13 @@ The remaining layers are updated accordingly, the chain rule just yields in long
     V_t = \sigma(W_v (h_{t-1}, E_t))
 \end{equation}
 
-The advantage of this architecture is that the previous outputs and hidden states can be treated as fixed variables and the back propagation (backward pass), does .not have to be calculated for the whole sequence. In practice libraries such as PyTorch use "reverse-mode automatic differentiation" (\cite{NIPS2019_9015}). Also due to the limited scope of this report, backpropagation for LSTMs will not be further investigated.
+The advantage of this architecture is that the previous outputs and hidden states can be treated as fixed variables and the gradient (backward pass) does not depend the whole sequence, mitigating the vanishing gradient problem to some extend. In practice, libraries such as PyTorch, use "reverse-mode automatic differentiation" (\cite{NIPS2019_9015}). Therefore, the calculation of the gradients for an LSTM will not be further investigated.
 
 \subsection{Word Embeddings}
 
 \subsubsection{Word2Vec}
 
-Word2Vec (\cite{mikolov2013efficient}; \cite{mikolov2013distributed}) is being used for the non-contextualised word embeddings. For creating the embeddings, first two matrices called the \textit{embedding matrix} and the \textit{context matrix} are being created. Their size also determines the dimensionality of the word embeddings later on. In each learning step a sample is taken from the embeddings and $n$ negative samples, not occurring in the skip-gram of the original word are taken. Thus process is called \textit{negative sampling}. The positive sample is looked up in the embeddings matrix, the negatives samples are looked up in the context matrix. Then the dot product between the positive and each negative sample is being taken (so we have $n$ dot products). As each word embedding has the size $1 \times \text{embedding size}$, the dot product will result in a scalar, to which the Sigmoid activation function is being applied. The result is then compared with the desired output (e.g. 1 for the positive word, 0 for the negative words). Figure \ref{fig:w2v_training_update} illustrates the intermediate steps. This whole process is conducted by a neural network, so it's easy to calculate the error and to update the weights. The weights are in this case the embedding and the context matrices. When the whole process is done, we take the embeddings matrix as the word embeddings. It's size is $\text{number of words} \times \text{embedding size}$. The number of words depends on the corpora and the minimum amount of appearances to count in a word.
+Word2Vec (\cite{mikolov2013efficient}; \cite{mikolov2013distributed}) is being used for the non-contextualised word embeddings. For creating the embeddings, two matrices called the \textit{embedding matrix} and the \textit{context matrix} are being created. Their size also determines the dimensionality of the word embeddings later on. In each learning step, a sample from the embeddings and $n$ negative samples, not occurring in the skip-gram of the original word, are being are taken. This process is called \textit{negative sampling}. The positive sample is looked up in the embeddings matrix, the negatives samples are looked up in the context matrix. Then, the dot product between the positive and each negative sample is being taken (so we have $n$ dot products). As each word embedding has the size $1 \times \text{embedding size}$, the dot product will result in a scalar, to which the Sigmoid activation function is being applied. The result is then compared with the desired output (e.g. 1 for the positive word, 0 for the negative words). Figure \ref{fig:w2v_training_update} illustrates these steps. This whole process is conducted by a neural network, so it is relatively easy to calculate the gradients and to update the weights. The weights, in this case, are the embedding and the context matrices. Once the whole process is completed, the embeddings matrix is being taken as the desired word embeddings. Its size is $\text{number of words} \times \text{embedding size}$. The number of words depends on the corpora and the minimum amount of appearances a word must have.
 
 \begin{figure}[hbt]
 	\center
@@ -270,9 +270,9 @@ Word2Vec (\cite{mikolov2013efficient}; \cite{mikolov2013distributed}) is being u
 
 \subsubsection{BERT}
 
-BERT (\cite{devlin2018bert}) is an encoder based on bidirectional transformers\footnote{Transformers will not be explained in this report as the number of words is quite limited. For a more in-depth understanding this blog post is recommended: https://jalammar.github.io/illustrated-transformer/}. Transformers use attention heads (\cite{vaswani2017attention}) for focusing on different parts or words of a sentence. For example, if the word \textit{it} is being processed, the attention heads will give focus to different parts of the whole sequence. This way the model can know, which entity is meant by \textit{it}. The advantage given is that a sequence is not read from one side to the other, but the whole sequence is processed at once. This is also called \textit{masked LM} or \textit{masked language modeling} (\cite{devlin2018bert}, p. 4).
+BERT (\cite{devlin2018bert}) is an encoder based on bidirectional transformer\footnote{Transformers will not be explained in this report as the number of words is quite limited. For a more in-depth understanding, this blog post is recommended: https://jalammar.github.io/illustrated-transformer/}. Transformers use attention heads (\cite{vaswani2017attention}) for focusing on different parts or words of a sentence. For example, if the word \textit{it} is being processed, the attention heads will give focus to different parts of the whole sequence. This way the model can know, which entity is meant by \textit{it}. The advantage is that a sequence is not read from one side to the other, but the whole sequence is processed at once. This is also called \textit{masked LM} or \textit{masked language modeling} (\cite{devlin2018bert}, p. 4).
 
-BERT can unambiguously represent single sentences and pair of two sentences (e.g. question/answer) ((\cite{devlin2018bert}, p. 4)) and sentences are differentiated by a special \texttt{[SEP]} token. BERT is trained on two tasks: \textit{MLM} (prediction of the real words behind the \texttt{[MASK]} tokens) and Next Sentence Prediction (NSP).
+BERT can unambiguously represent single sentences and pair of two sentences, for example question and answer (\cite{devlin2018bert}, p. 4). Sentences are differentiated by a special \texttt{[SEP]} token. BERT is trained on two tasks: \textit{MLM} (prediction of the real words behind the \texttt{[MASK]} tokens) and Next Sentence Prediction (NSP).
 
 \begin{figure}[hbt]
 	\center
@@ -281,7 +281,7 @@ BERT can unambiguously represent single sentences and pair of two sentences (e.g
 	\label{fig:bert_mlm}
 \end{figure}
 
-\paragraph{MLM} During training of BERT, before a sequence is passed to BERT, 15 percent of it's elements are replaced by special \texttt{[MASK]} tokens, the input is partly shuffled and a special classification token \texttt{[CLS]} is being added at the beginning of the tokenised sentence (\cite{devlin2018bert}, p. 4). BERT then learns to predict the masked tokens. Figure \ref{fig:bert_mlm} illistrates the process.
+\paragraph{MLM} During the training of BERT, before a sequence is passed to BERT, 15 percent of its elements are replaced by special \texttt{[MASK]} tokens, the input is partly shuffled and a special classification token \texttt{[CLS]} is being added at the beginning of the tokenised sentence (\cite{devlin2018bert}, p. 4). BERT then learns to predict the masked tokens. Figure \ref{fig:bert_mlm} illustrates the process.
 
 \begin{figure}[hbt]
 	\center
@@ -290,7 +290,7 @@ BERT can unambiguously represent single sentences and pair of two sentences (e.g
 	\label{fig:bert_nsp}
 \end{figure}
 
-\paragraph{NSP} Given two sentences A and B, BERT has to predict the likelihood of sentence B actually following sentence A (\cite{devlin2018bert}, p. 4). Figure \ref{fig:bert_nsp} illustrates the process.
+\paragraph{NSP} Given two sentences A and B, BERT has to predict the likelihood of sentence B actually following sentence A (\cite{devlin2018bert}, p. 4). Figure \ref{fig:bert_nsp} shows the process.
 
 \begin{figure}[hbt]
 	\center
@@ -299,23 +299,23 @@ BERT can unambiguously represent single sentences and pair of two sentences (e.g
 	\label{fig:bert_cwe}
 \end{figure}
 
-As BERT is just an encoder, another classifier for downstream tasks such as classification is compulsory. The encoder outputs between the different can be used as contextualised word embeddings. Figure \ref{fig:bert_cwe} shows their corresponding $F_1$ scores on the development set during training of BERT. We will use the output of the last encoding layer in this project as the embedding which achieved an $F_1$ score of $94.9$ percent. The specified \texttt{[CLS]} token, originally thought for classification, will not be used as the aim is not to achieve a high accuracy, but rather to compare non-contextualised and contextualised embeddings.
+As BERT is just an encoder, another classifier for downstream tasks such as classification is compulsory. The encoder outputs between the different layers can be used as contextualised word embeddings. Figure \ref{fig:bert_cwe} shows their corresponding $F_1$ scores on the development set during training of BERT. We will use the output of the last encoding layer in this project as embeddings which achieved an $F_1$ score of $94.9$ percent. The specified \texttt{[CLS]} token, originally thought for classification, will not be used as the aim is not to achieve a high accuracy, but rather to compare non-contextualised and contextualised word embeddings.
 
 \subsubsection{DistilBERT}
 
-As even the smallest BERT model has high computational demands, \textit{DistilBERT} (\cite{sanh2019distilbert}) is used for this project. Distillation is a process in which a smaller model tries to mimic the behaviour of a larger model in such a way, that it behaves almost the same. The concept was introduced by \cite{10.1145/1150402.1150464} and later generalised by \cite{hinton2015distilling}. The smaller model can also be an enemble of models (similarily to the concepts of AdaBoost). The result is a model that is 40 percent smaller, 60 percent faster while keeping 97 percent of BERT understanding capabilities (\cite{sanh2019distilbert}, p. 5).
+As even the smallest BERT model has high computational demands, \textit{DistilBERT} (\cite{sanh2019distilbert}) is used for this project. Distillation is a process in which a smaller model tries to mimic the behaviour of a larger model in such a way that it behaves almost the same. The concept was introduced by \cite{10.1145/1150402.1150464} and later generalised by \cite{hinton2015distilling}. The smaller model can also be an enemble of models (similar to the concepts of AdaBoost). The result is a model that is 40 percent smaller and 60 percent faster while keeping 97 percent of BERTs understanding capabilities (\cite{sanh2019distilbert}, p. 5).
 
 \section{Data}
 
-\textbf{334 words}
+\textbf{339 words}
 
 \subsection{Presentation}
 
 \textit{Present your data. What information does it contain? Where did you get it from? What preprocessing did you do, if any?}
 
-The data used in this project consists of Amazon reviews categorised by one to five stars and is provided by Xiang Zhang\footnote{http://xzh.me/}. The data is freely available and can be downloaded on Google Drive: \href{https://drive.google.com/drive/folders/0Bz8a\_Dbh9Qhbfll6bVpmNUtUcFdjYmF2SEpmZUZUcVNiMUw1TWN6RDV3a0JHT3kxLVhVR2M}{\texttt{amazon\_review\_full\_csv.tar.gz}}.
+The data set used in this project consists of Amazon reviews categorised by one to five stars and is provided by Xiang Zhang\footnote{http://xzh.me/}. The data is freely available and can be downloaded on Google Drive: \href{https://drive.google.com/drive/folders/0Bz8a\_Dbh9Qhbfll6bVpmNUtUcFdjYmF2SEpmZUZUcVNiMUw1TWN6RDV3a0JHT3kxLVhVR2M}{\texttt{amazon\_review\_full\_csv.tar.gz}}.
 
-Originally the data is divided in training data with $3\,000\,000$ data points and test data with $650\,000$ data points. Each data point consists of a label, indicating how many stars the review has, a title and the review text. One row looks like this: \\
+Originally, the data is divided into training data with $3\,000\,000$ data points and test data with $650\,000$ data points. Each data point consists of a label, indicating how many stars the review has, a title and the review text. One sample looks like this: \\
 
 \texttt{"3","more like funchuck","Gave this to my dad for a gag gift after directing ""Nunsense,"" he got a reall kick out of it!"} \\
 
@@ -333,7 +333,7 @@ Originally the data is divided in training data with $3\,000\,000$ data points a
 	\label{fig:review_length_distribution}
 \end{figure}
 
-The class distribution can be seen in figure \ref{fig:class_distribution} and the distribution of the review lengths (words) can be seen in figure \ref{fig:review_length_distribution}. The percentiles can be found in table \ref{tab:percentiles}.
+The class distribution can be seen in figure \ref{fig:class_distribution} and the distribution of review lengths (words) can be seen in figure \ref{fig:review_length_distribution}. The percentiles can be found in table \ref{tab:percentiles}.
 
 \begin{table}[h]
     \centering
@@ -347,23 +347,23 @@ The class distribution can be seen in figure \ref{fig:class_distribution} and th
 
 \subsection{Preprocessing}
 
-The original training and test data sets are read, concatenated and shuffled. Then the column for the \textit{title} of the review is being dropped and all labels are shifted by $-1$ so that the labels are $0, 1, 2, 3, 4$. Next, the data is split into 85 percent training, 10 percent validation and 5 percent test data. For the following sentences a padding of 200 has been used\footnote{Normally only the training data should be used for deciding the padding. Due to time constrains this wasn't changed. As 85 percent randomly chosen data is used for training, the result is likely to not be that much different.}. This lies way above the 99th percentile of $177$ words as it accounts for that during the tokenisation the sentences become longer due to punctuation and as well as some words becoming separated.
+The original training and test data sets are read, concatenated and shuffled. Then the column for the \textit{title} of the review is being dropped and all labels are shifted by $-1$ so that the labels start at zero: $0, 1, 2, 3 \text{and} 4$. Next, the data is split into 85 percent training, 10 percent validation and 5 percent test data. For the following sentences, a padding of 200 has been used\footnote{Normally only the training data should be used for deciding the padding. Due to time constrains this wasn't changed. As 85 percent randomly chosen data is used for training, the result is likely to not be that much different.}. This lies way above the 99th percentile of $177$ words as it accounts for two facts. Firstly, the sentences become longer due to punctuation, and secondly, some words are being further split during tokenisation.
 
-The padding is applied after tokenisation. The tokeniser used for both, Word2Vec and BERT, is the DistilBERT tokeniser provided by the HuggingFace library\footnote{https://huggingface.co/transformers/model\_doc/distilbert.html\#distilberttokenizer}. For Word2Vec, only the $1\,000\,000$ most common embeddings are taken due to computational constraints. Therefore all other word are considered unknown.
+The padding is applied after tokenisation. The tokeniser used for both, Word2Vec and BERT, is the DistilBERT tokeniser provided by the HuggingFace library\footnote{https://huggingface.co/transformers/model\_doc/distilbert.html\#distilberttokenizer}. For Word2Vec, only the $1\,000\,000$ most common embeddings are taken due to computational constraints. Inferentially, all other word are considered unknown.
 
-After preprocessing, the three data sets are saved as \texttt{.csv} files where the first $200$ columns hold the word Ids $X$ and column $201$ holds the label $Y$.
+After preprocessing, the three data sets are saved as \texttt{.csv} files, where the first $200$ columns hold the word Ids $X$ and the last column holds the label $Y$.
 
 \section{Method}
 
-\textbf{357 words}
+\textbf{358 words}
 
 \textit{Explain how you carried out your study. Aim to be detailed enough for others to reproduce your results.}
 
 All four model combinations are implemented in PyTorch. The source code and detailed instructions for replicating the results can be found in the corresponding GitHub repository\footnote{https://github.com/flennic/text-mining-project}.
 
-The first step is to create the non-contextualised or contextualised embeddings for the review. In the case of Word2Vec an embedding layer\footnote{https://pytorch.org/docs/stable/nn.html?highlight=embedding\#torch.nn.Embedding} is used, mapping the token Ids to non-contextualised word-embeddings of shape $(200 \times 300)$ where $200$ is the padding length and $300$ the word embedding size of Word2Vec. The embeddings are not frozen, so the embeddings can change during the training process. This is to account for the limitation of not using all embeddings. The embeddings are loaded to the embeddings layer using the Gensim library (\cite{inproceedings}). For the contextualised embeddings, the tokenised sentences are fed to DistilBERT\footnote{https://huggingface.co/transformers/model\_doc/distilbert.html} and the output of the last encoder is then taken as the embedding. The pretrained model \textit{distilbert-base-uncased} is used and all weights are frozen during training.
+The first step is to create the non-contextualised or contextualised embeddings for the reviews. In the case of Word2Vec, an embedding layer\footnote{https://pytorch.org/docs/stable/nn.html?highlight=embedding\#torch.nn.Embedding} is used, mapping the token Ids to non-contextualised word-embeddings of shape $(200 \times 300)$ where $200$ is the padding length and $300$ the word embedding size of Word2Vec. The embeddings are not frozen, so the embeddings can change during the training process. This is to account for the limitation of not using all Word2Vec embeddings. The embeddings are loaded into the embeddings layer using the Gensim library (\cite{inproceedings}). For the contextualised word embeddings, the tokenised sentences are fed to DistilBERT\footnote{https://huggingface.co/transformers/model\_doc/distilbert.html} and the output of the last encoder is then taken as the embedding. The pretrained model \textit{distilbert-base-uncased} is being used and all weights are frozen during training.
 
-The LSTM directly takes the sequences as in input whereas for the FFN the sequences must first be flattened, thus resulting in $60\,000$ inputs. The model architectures are given by the following. The model parameters can be found in the appendix at \ref{sec:model_settings}.
+The LSTM directly takes the sequences as input whereas for the FFN the sequences must be flattened first, thus resulting in $60\,000$ inputs. The model parameters can be found in appendix \ref{sec:model_settings} and the architectures are given by the following:
 
 \paragraph{FFN (Word2Vec)} $X$ $\rightarrow$ Embedding $\rightarrow$ Flattening $\rightarrow$ Linear $\rightarrow$ Sigmoid $\rightarrow$ Dropout $\rightarrow$ Linear $\rightarrow$ LogSoftMax
 
@@ -373,17 +373,17 @@ The LSTM directly takes the sequences as in input whereas for the FFN the sequen
 
 \paragraph{LSTM (DistilBERT)} $X$ $\rightarrow$ DistilBERT $\rightarrow$ LSTM $\rightarrow$ Dropout $\rightarrow$ Linear $\rightarrow$ Sigmoid $\rightarrow$ LogSoftMax \\
 
-The last linear layer is always used to map to the five classes of Amazon reviews. Furthermore, dropout (\cite{JMLR:v15:srivastava14a}) is being applied for regularisation and the gradients for the LSTM are clipped at a value of $5$ to prevent exploding gradients (\cite{pascanu2012difficulty}). Adam (\cite{kingma2014adam}) is used as the optimiser and cross-entropy loss as the loss function.
+The last linear layer is always used to map to the five classes of Amazon reviews, thus the labels. Furthermore, dropout (\cite{JMLR:v15:srivastava14a}) is being applied for regularisation and the gradients for the LSTM are clipped at a value of $5$ to prevent exploding gradients (\cite{pascanu2012difficulty}). Adam (\cite{kingma2014adam}) is used as the optimiser and cross-entropy loss as the loss function.
 
-As the data set is balanced, accuracy is used as it provides a single value to estimate the models performance.
+As the data set is balanced, the measurement being used is accuracy since it provides a single value to adequately estimate the performance of the models.
 
 \section{Results}
 
-\textbf{395 words}
+\textbf{397 words}
 
 \textit{Present your results in an objective way. Use tables and charts, but do not forget to also include a summary in text form. Do not interpret your results.}
 
-All four model combinations and their achieved accuracies can be seen in table \ref{tab:results}. The accuracies for training have dropout enabled\footnote{Enabling another prediction without dropout would have been too time consuming for this project.} and are trailing accuracies. This means that the accuracy will jump between the epochs, as the model is usually less accurate during the beginning of an epoch and the trailing training accuracy is always the average until the current batch. Figure \ref{fig:ffn_w2v_results} shows the accuracies for the FFN with Word2Vec embeddings for training, validation and test for different epochs, figure \ref{fig:ffn_bert_results} shows the accuracies for the FFN with DistilBERT, figure \ref{fig:lstm_w2v_results} shows the accuracies for the LSTM with Word2Vec embeddings and figure \ref{fig:lstm_bert_results} shows the accuracies for the LSTM with DestilBERT embeddings. The lowest baseline accuracy is at $20.00$ percent which could be achieved by simply predicting one class at all times.
+All four model combinations and their achieved accuracies can be seen in table \ref{tab:results}. The accuracies for training have dropout enabled\footnote{Enabling another prediction without dropout would have been too time consuming for this project.} and are trailing accuracies. This means that the accuracy will jump between the epochs, as the model is usually less accurate during the beginning of an epoch and the trailing training accuracy is always the average up to the current batch. Figure \ref{fig:ffn_w2v_results} shows the accuracies for the FFN with Word2Vec embeddings for training, validation and test for different epochs, figure \ref{fig:ffn_bert_results} shows the accuracies for the FFN with DistilBERT, figure \ref{fig:lstm_w2v_results} shows the accuracies for the LSTM with Word2Vec embeddings and figure \ref{fig:lstm_bert_results} shows the accuracies for the LSTM with DestilBERT embeddings. The lowest baseline accuracy is around $20.00$ percent which could be achieved by simply predicting one class at all times.
 
 \begin{table}[h]
     \centering
@@ -398,7 +398,7 @@ All four model combinations and their achieved accuracies can be seen in table \
     \label{tab:results}
 \end{table}
 
-It can be seen that the FFN with Word2Vec embeddings has the lowest testing score with a test accuracy of $43.10$ percent. The FFN with using DistilBERT embeddings achieves a higher test accuracy of $49.98$ percent, closely followed by the LSTM using Word2Vec embeddings with a test accuracy of $50.49$ percent. The highest accuracy is achieved by the LSTM in combination with DistilBERT embedding and and is $56.43$ for the test data set. For all model combinations except the FFN using Word2Vec embeddings, the test accuracy is slightly higher compared to validation, which seems a bit odd, but this behaviour can be seen for all these other models. For the FFN using Word2Vec the test accuracy is way lower than the training or validation accuracy\footnote{Due to these results the source code has been investigated but no issues have been found. Therefore these results are treated as valid.}.
+It can be seen that the FFN with Word2Vec embeddings has the lowest testing score with a test accuracy of $43.10$ percent. The FFN using DistilBERT embeddings achieves a higher test accuracy of $49.98$ percent, closely followed by the LSTM using Word2Vec embeddings with a test accuracy of $50.49$ percent. The highest accuracy is achieved by the LSTM in combination with DistilBERT embeddings and peaks at $56.43$ for the test data set. For all model combinations, except the FFN using Word2Vec embeddings, the test accuracy is slightly higher compared to their validation accuracies, which seems a bit odd. This pattern can be seen for all these other models. For the FFN, using Word2Vec, the test accuracy is way lower than the training or validation accuracy\footnote{Due to these results the source code has been investigated but no issues have been found. Therefore these results are treated as valid.}.
 
 \begin{figure}[hbt]
 	\center
@@ -427,7 +427,7 @@ It can be seen that the FFN with Word2Vec embeddings has the lowest testing scor
 	\label{fig:training_times}
 \end{figure}
 
-Figure \ref{fig:training_times} shows the training times for the model combinations. The models using non-contextualised word embeddings (Word2Vec) are trained for 30 epochs and the models using contextualised word embeddings (DistilBERT) are trained for 3 epochs. Both models using DilstilBERT word embeddings have the highest training times with $12.1$ hours for the LSTM and and $11.65$ hours for the FFN. Around have of the time is needed for the LSTM with Word2Vec word embeddings and a training time around $6.35$ hours. The lowest training time is achieved by the FFN with Word2Vec embeddings and takes just $2.3$ hours.
+Figure \ref{fig:training_times} shows the training times for the model combinations. The models using non-contextualised word embeddings (Word2Vec) are trained for 30 epochs and the models using contextualised word embeddings (DistilBERT) are trained for 3 epochs. Both models using DistilBERT word embeddings have the highest training times with $12.1$ hours for the LSTM and and $11.65$ hours for the FFN. Around half of the time is needed for the LSTM with Word2Vec word embeddings with a training time around $6.35$ hours. The lowest training time is achieved by the FFN with Word2Vec embeddings and takes just $2.3$ hours.
 
 % ffn_w2v
 \begin{figure}[hbt]
@@ -2669,28 +2669,28 @@ Figure \ref{fig:training_times} shows the training times for the model combinati
 
 \section{Discussion}
 
-\textbf{424 words}
+\textbf{417 words}
 
 \textit{What do you make of it? Discuss your results and present your analysis.
 Relate your results to your task/question.}
 
-The results show that contextualised word embeddings provide a higher accuracy, with a difference of almost $7$ percent points for the FFN and almost $6$ percent for the LSTM. Apart from achieving a higher accuracy also less iterations though the training data set are necessary for not only achieving the same, but better results. This makes the trained model less prone to overfit the data. Each training sample, in this case, is seen $40$ times compared to the FFN using Word2Vec word embeddings and $20$ times compared to the LSTM using Word2Vec word embeddings compared to their non-contextualised counterparts. Note that for this factor not only the difference in epochs must be taken in, but also the amount of data loaders used. For example, when $2$ data loaders are used, the whole data set is seen twice during one epoch\footnote{This is due to lazy loading the data form disk as the whole data does not fit into memory.}. The overfit can be especially seen for the FFN using Word2Vec embeddings. Looking at figure \ref{fig:ffn_w2v_results} it can also be seen that the test accuracy becomes lower going from $20$ to $30$ training epochs.
+The results show that contextualised word embeddings provide a higher accuracy, with a difference of almost $7$ percent points for the FFN and almost $6$ percent for the LSTM. Apart from achieving a higher accuracy, also less iterations through the training data set are necessary for not only achieving the same, but better results. This makes the trained model less prone to overfit the data. The FFN using Word2Vec has seen the data $40$ times more often and the LSTM using Word2Vec has seen the data $20$ times more often compared to their DistilBERT counterparts. Note that for calculating these factors, not only the difference in epochs must be taken in, but also the amount of data loaders used. For example, when $2$ data loaders are used, the whole data set is seen twice during each epoch\footnote{This is due to lazy loading the data form disk as the whole data does not fit into memory.}. The overfit can be especially seen for the FFN using Word2Vec embeddings. Looking at figure \ref{fig:ffn_w2v_results}, it can be seen that the test accuracy for the FNN using Word2Vec becomes actually lower going from $20$ to $30$ training epochs.
 
-It can also be seen that using contextualised word embeddings the training times for the models are a lot higher, the biggest difference between the LSTM using DistilBERT embeddings and the FFN using Word2Vec embeddings with almost a factor of $6$. One interesting finding is that for the Word2Vec embeddings the LSTM increases the training time by a factor around $3$, whereas for the DistilBERT embeddings the difference is almost negligible. The reason for that could be a parallelisation during the training process, as the implementation used here utilised multiple data loaders. This could be taken as an advantage in the future, as parallelised hardware is easier scalable (see core counts for CPU and GPU with are basically made for parallel execution) than single thread performance. Another interesting finding is that, despite the fact that DistilBERT basically is a bidirectional encoder, still an LSTM is necessary to extract all the information from the contextualised embeddings. The FFN using the word embeddings from DistilBERT is way less accurate than the equivalent LSTM. Also note, that due to computational limitations, this is a rather simple LSTM with just two layers, a small hidden state and foremost, it it just unidirectional. Therefore one presumption is that a larger BiLSTM might achieve even higher accuracies.
+Using contextualised word embeddings, the training times for the models are a lot higher, the biggest difference between the LSTM using DistilBERT embeddings and the FFN using Word2Vec embeddings with a factor of almost $6$. One interesting finding is that, for the Word2Vec embeddings, the LSTM increases the training time by a factor around $3$, whereas for the DistilBERT embeddings the difference is almost negligible. The reason for that could be a parallelisation during the training process, as the implementation used here utilises multiple data loaders. This could be exploited in the future, as parallelised hardware easier available (see core counts for CPU and GPU which are basically made for parallel execution) than improved single thread performance. Another interesting finding is that, despite the fact that DistilBERT basically is a bidirectional encoder, an LSTM is still necessary to extract all the information from the contextualised embeddings. The FFN using word embeddings from DistilBERT is way less accurate than the equivalent LSTM. Also note, that due to computational limitations, a rather simple LSTM is used. It has just two layers, a small hidden state and foremost, it it just unidirectional. Therefore, one presumption is that a larger BiLSTM might achieve even higher accuracies.
 
 For the results acquired in this project, the only hyperparameter search that was conducted, was manual tweaking the learning rate.
 
 \section{Conclusion}
 
-\textbf{190 words}
+\textbf{195 words}
 
 \textit{Based on your results and their analysis, what new knowledge do you take away from your project?}
 
-Contextualised word embeddings are indeed more powerful than their non-contextualised counterparts. The price for that is a high computational demand. Some of the additional demanded computational power is compensated by parallelisation, still it's high. Especially considering that DistilBERT and not BERT is being used. DistilBERT is not only 60 percent faster (\cite{sanh2019distilbert}, p. 5), but also 40 percent smaller, so the batch size can be increased which makes it even faster compared to BERT.
+Contextualised word embeddings are indeed more powerful than their non-contextualised counterparts. The price for this is a high computational demand. Some of the additionally demanded computational power is compensated by parallelisation, nevertheless it is still high, especially considering that DistilBERT and not BERT is being used. DistilBERT is not only 60 percent faster (\cite{sanh2019distilbert}, p. 5), but also 40 percent smaller, so the batch size can be increased which makes it actually more than 60 percent faster compared to BERT.
 
-With deep learning already requiring a lot of computational power, these new models taking it to the next level, which is indeed a problem. The problem is not only the price for the required hard, but also environmental issues. However, these new transformers indeed capture more information and might push the domain of NLP forward. It can also be seen that, at least to some degree, the research society is aware of this problem and trying to reduce computation demands. Here DistilBERT is used, Google also released ALBERT (\cite{2019albert}) which is a lighter version of BERT.
+With deep learning already requiring a lot of computational power, these new models climb to the next level, which indeed is a problem. It is not only the price for the required hardware, but also environmental issues, that raise concern. Nonetheless, these new transformers capture more information and achieve better results. It can also be seen that, at least to some degree, the research society is aware of this problem and tries to reduce computation demands. Here DistilBERT is used, Google also released ALBERT (\cite{2019albert}) which is a lighter version of BERT.
 
-Still the question remains, if throwing hardware at our problems will be a long-term solution for the domain of NLP.
+Still the question remains, if throwing more hardware at our problems will be a long-term solution for tackling new and more challenging problems.
 
 \clearpage
 

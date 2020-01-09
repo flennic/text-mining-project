@@ -119,7 +119,7 @@ For further details, please check the paper.
 
 ```
 
-## License information
+## License Information
 
 See the attached license file for further notice.
 

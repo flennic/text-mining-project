@@ -1,4 +1,3 @@
-%\documentclass{article}
 \documentclass[11pt]{scrartcl}
 \usepackage[utf8]{inputenc}
 
@@ -138,7 +137,7 @@ Within the last years, significant progress based on deep learning has been made
 	\label{fig:kingmanwomanqueen}
 \end{figure}
 
-Two known methods for word embeddings are \textit{Word2Vec} (\cite{mikolov2013efficient}; \cite{mikolov2013distributed}) and GloVe (\cite{pennington2014glove}). Word2Vec is either trained based on a \textit{continuous bag of words} model (\cite{mikolov2013efficient}, p. 4), predicting a missing word within a sequence, or based on a \textit{skip-gram} model  (\cite{mikolov2013distributed}, p. 2), using a sliding window over a sequence of words. Both approaches for Word2Vec are based on neural networks for learning. GloVe embeddings in contrast are based on matrix factorisation techniques which create embeddings in such a way that the dot product between two embeddings equals the log of their occurrences within a given context (\cite{pennington2014glove}, p. 2; \cite{pennington2014glove}, equation 7). An example of embeddings can be seen in figure \ref{fig:kingmanwomanqueen}, illustrating the embedded information and it's similarity.
+Two known methods for word embeddings are \textit{Word2Vec} (\cite{mikolov2013efficient}; \cite{mikolov2013distributed}) and GloVe (\cite{pennington2014glove}). Word2Vec is either trained based on a \textit{continuous bag of words} model (\cite{mikolov2013efficient}, p. 4), predicting a missing word within a sequence, or based on a \textit{skip-gram} model  (\cite{mikolov2013distributed}, p. 2), using a sliding window over a sequence of words. Both approaches for Word2Vec are based on neural networks for learning. GloVe embeddings in contrast are based on matrix factorisation techniques which create embeddings in such a way that the dot product between two embeddings equals the log of their occurrences within a given context (\cite{pennington2014glove}, p. 2; \cite{pennington2014glove}, equation 7). An example of embeddings can be seen in figure \ref{fig:kingmanwomanqueen}, illustrating the embedded information and its similarity.
 
 These embeddings will have one fixed embedding for each (known) word, independently from their context. We will therefore call these \textit{non-contextualised embeddings}. This implies that for example a word with a meaning dependent on its context might not always be adequately embedded (\cite{young2017recent}, p. 5). Therefore the next step was to use embeddings which take the context into consideration. One of these models is Embedding from Language Model (ELMo) (\cite{peters2018deep}), which utilises a bidirectional language model and thereof being aware of words preceding and following the word to embed. We will call such embeddings \textit{contextualised} embeddings.
 
@@ -321,7 +320,7 @@ Originally, the data is divided into training data with $3\,000\,000$ data point
 	\label{fig:review_length_distribution}
 \end{figure}
 
-It can be seen in figure \ref{fig:class_distribution} that the class distribution is almost equal. The distribution of review lengths (words) can be seen in figure \ref{fig:review_length_distribution} and it shows an interesting pattern, having some. The percentiles can be found in table \ref{tab:percentiles} and it can be sees that with $177$ words $99$ percent of the reviews do not need to be truncated.
+It can be seen in figure \ref{fig:class_distribution} that the class distribution is almost equal. The distribution of review lengths (words) can be seen in figure \ref{fig:review_length_distribution} and it shows an interesting pattern, having some equally distributed spikes which seem not to have a natural source. The percentiles can be found in table \ref{tab:percentiles} and it can be sees that with $177$ words $99$ percent of the reviews do not need to be truncated.
 
 \begin{table}[h]
     \centering

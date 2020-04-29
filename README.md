@@ -12,7 +12,7 @@ The two classifier used in this project are a normal feed-forward network and an
 
 First clone the repository locally:
 
-```git clone https://github.com/flennic/text-mining-project```
+```git clone git@github.com:flennic/text-mining-project.git```
 
 Next you need the data set itself as well as the word embeddings.
 The dataset [Amazon Reviews for Sentiment Analysis](https://drive.google.com/open?id=0Bz8a_Dbh9QhbZVhsUnRWRDhETzA) can be found on Google Drive and is originally provided by Xiang Zhang. The data is expected to be in a folder `data/original/` but you can change the path in the `settings.json` if desired.

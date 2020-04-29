@@ -4,7 +4,7 @@ Repository for the project in the course 732A92 Text Mining at Linköping Univer
 
 ## Purpose
 
-This is a project in the above mentioned course. This repository will include the source code (`src`), some notebooks for mingling around (`notebooks`) and the report itself (`report`).
+This is a project in the above mentioned course. This repository includes the source code (`src`), some notebooks for mingling around (`notebooks`) and the report itself (`report`).
 
 The two classifier used in this project are a normal feed-forward network and an unidirecrional LSTM (due to performance reasons just unidirecrional). Both are trained using Word2Vec embeddings (without context) and Bert embeddings (output of the last layer, with context). Word2Vec is being trained while the Bert model is frozen due to it's size. Also [DistilBERT](https://medium.com/huggingface/distilbert-8cf3380435b5) has been used to improve the performance, as the original BERT model is quite large.
 

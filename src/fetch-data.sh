@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 printf "\nWelcome to this small assistant for fetching the data. This script does not have any error handling, so if anything breaks, you're on your own. If any of the download links expire, check either the links in the README.md or drop me an email at maximilian@pfundstein.org. Last chance to abort operation :)\n\n"
 
